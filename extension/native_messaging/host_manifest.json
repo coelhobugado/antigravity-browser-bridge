@@ -1,0 +1,9 @@
+{
+  "name": "com.antigravity.agent_browser",
+  "description": "Antigravity Agent Browser Native Messaging Host",
+  "path": "C:\\caminho\\para\\o\\seu\\agent-browser.exe",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://ID_DA_SUA_EXTENSAO_AQUI/"
+  ]
+}

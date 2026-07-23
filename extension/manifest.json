@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Antigravity Agent Connector",
+  "version": "1.0.0",
+  "description": "Permite ao Antigravity agent operar o navegador nativamente com as contas ativas do usuário.",
+  "permissions": [
+    "nativeMessaging",
+    "activeTab",
+    "scripting",
+    "tabs",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_title": "Antigravity Connector"
+  }
+}
