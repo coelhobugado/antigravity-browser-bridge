@@ -16,6 +16,7 @@ mod test_utils;
 mod upgrade;
 mod validation;
 pub mod antigravity;
+pub mod work;
 
 use serde_json::json;
 use sha2::{Digest, Sha256};

@@ -2333,22 +2333,16 @@ fn call_tool(params: Option<&Value>, config: &McpConfig) -> Result<Value, Protoc
         TOOL_CHAT => call_chat(arguments),
         TOOL_EVAL => call_eval(arguments),
         TOOL_CLOSE => call_close(arguments),
-        TOOL_WORK_SESSION_START |
-        TOOL_WORK_OBSERVE |
-        TOOL_WORK_EXECUTE |
-        TOOL_WORK_VERIFY |
-        TOOL_WORK_CHECKPOINT |
-        TOOL_WORK_RESUME |
-        TOOL_WORK_EXPORT |
-        TOOL_WORK_REQUEST_APPROVAL |
-        TOOL_WORK_STATUS |
-        TOOL_WORK_CANCEL => Ok(json!({
-            "isError": false,
-            "content": [{
-                "type": "text",
-                "text": "Not yet implemented (Antigravity work stub)."
-            }]
-        })),
+        TOOL_WORK_SESSION_START => Ok(crate::antigravity::mcp_compact::work_session_start(arguments)),
+        TOOL_WORK_OBSERVE => Ok(crate::antigravity::mcp_compact::work_observe(arguments)),
+        TOOL_WORK_EXECUTE => Ok(crate::antigravity::mcp_compact::work_execute(arguments)),
+        TOOL_WORK_VERIFY => Ok(crate::antigravity::mcp_compact::work_verify(arguments)),
+        TOOL_WORK_CHECKPOINT => Ok(crate::antigravity::mcp_compact::work_checkpoint(arguments)),
+        TOOL_WORK_RESUME => Ok(crate::antigravity::mcp_compact::work_resume(arguments)),
+        TOOL_WORK_EXPORT => Ok(crate::antigravity::mcp_compact::work_export(arguments)),
+        TOOL_WORK_REQUEST_APPROVAL => Ok(crate::antigravity::mcp_compact::work_request_approval(arguments)),
+        TOOL_WORK_STATUS => Ok(crate::antigravity::mcp_compact::work_status(arguments)),
+        TOOL_WORK_CANCEL => Ok(crate::antigravity::mcp_compact::work_cancel(arguments)),
         _ => unreachable!("known MCP tool missing call handler: {}", name),
     }
 }
