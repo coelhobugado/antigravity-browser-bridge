@@ -6,3 +6,5 @@ pub mod sidecar;
 pub mod security;
 pub mod agent;
 pub mod artifact;
+pub mod desktop;
+pub mod chrome_extension;
