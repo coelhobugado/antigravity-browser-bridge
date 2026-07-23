@@ -1,4 +1,4 @@
 Windows Registry Editor Version 5.00
 
 [HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.antigravity.agent_browser]
-@="C:\\caminho\\para\\o\\seu\\repositorio\\agent-browser\\extension\\native_messaging\\host_manifest.json"
+@="C:\\Users\\gabri\\Downloads\\web-controller\\agent-browser\\extension\\native_messaging\\host_manifest.json"
