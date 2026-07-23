@@ -15,6 +15,7 @@ mod skills;
 mod test_utils;
 mod upgrade;
 mod validation;
+pub mod antigravity;
 
 use serde_json::json;
 use sha2::{Digest, Sha256};
@@ -1086,6 +1087,41 @@ fn main() {
             exit(1);
         }
         return;
+    }
+
+    // Handle antigravity subcommand
+    if clean.first().map(|s| s.as_str()) == Some("antigravity") {
+        match clean.get(1).map(|s| s.as_str()) {
+            Some("install") => {
+                let scope = if clean.iter().any(|a| a == "--scope" && clean.contains(&"workspace".to_string())) {
+                    "workspace"
+                } else {
+                    "global"
+                };
+                if scope == "workspace" {
+                    antigravity::installer::install_workspace(".");
+                } else {
+                    antigravity::installer::install_global();
+                }
+                return;
+            }
+            Some("doctor") => {
+                let _ = antigravity::doctor::check_installation();
+                return;
+            }
+            Some("permissions") => {
+                let _ = antigravity::permissions::validate_permissions();
+                return;
+            }
+            Some("uninstall") => {
+                antigravity::installer::uninstall();
+                return;
+            }
+            _ => {
+                eprintln!("Unknown antigravity subcommand");
+                exit(1);
+            }
+        }
     }
 
     // Handle session separately (doesn't need daemon)

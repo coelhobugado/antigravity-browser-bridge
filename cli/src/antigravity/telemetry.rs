@@ -2,7 +2,7 @@
 pub struct LocalTelemetry;
 
 impl LocalTelemetry {
-    pub fn record_failure(error_type: &str) {
+    pub fn record_failure(_error_type: &str) {
         // TODO: Implement
     }
 }

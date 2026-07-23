@@ -170,6 +170,16 @@ const TOOL_CHAT: &str = "agent_browser_chat";
 const TOOL_EVAL: &str = "agent_browser_eval";
 const TOOL_CLOSE: &str = "agent_browser_close";
 const TOOL_TOOLS_PROFILES: &str = "agent_browser_tools_profiles";
+const TOOL_WORK_SESSION_START: &str = "agent_browser_work_session_start";
+const TOOL_WORK_OBSERVE: &str = "agent_browser_work_observe";
+const TOOL_WORK_EXECUTE: &str = "agent_browser_work_execute";
+const TOOL_WORK_VERIFY: &str = "agent_browser_work_verify";
+const TOOL_WORK_CHECKPOINT: &str = "agent_browser_work_checkpoint";
+const TOOL_WORK_RESUME: &str = "agent_browser_work_resume";
+const TOOL_WORK_EXPORT: &str = "agent_browser_work_export";
+const TOOL_WORK_REQUEST_APPROVAL: &str = "agent_browser_work_request_approval";
+const TOOL_WORK_STATUS: &str = "agent_browser_work_status";
+const TOOL_WORK_CANCEL: &str = "agent_browser_work_cancel";
 const DEFAULT_TIMEOUT_MS: u64 = 120_000;
 const MAX_IMAGE_BYTES: u64 = 10 * 1024 * 1024;
 const RAW_JSON_ARG: &str = "--raw-json";
@@ -218,6 +228,7 @@ enum ToolProfile {
     Tabs,
     React,
     Mobile,
+    AntigravityWork,
     All,
 }
 
@@ -231,6 +242,7 @@ impl ToolProfile {
             "tabs" | "frames" => Some(Self::Tabs),
             "react" | "web" => Some(Self::React),
             "mobile" | "ios" => Some(Self::Mobile),
+            "antigravity-work" | "antigravity" => Some(Self::AntigravityWork),
             "all" | "full" => Some(Self::All),
             _ => None,
         }
@@ -245,6 +257,7 @@ impl ToolProfile {
             Self::Tabs => "tabs",
             Self::React => "react",
             Self::Mobile => "mobile",
+            Self::AntigravityWork => "antigravity-work",
             Self::All => "all",
         }
     }
@@ -258,6 +271,7 @@ impl ToolProfile {
             Self::Tabs => "Tab, window, frame, and JavaScript dialog management.",
             Self::React => "React tree inspection, render recording, Suspense inspection, Web Vitals, SPA pushstate, and init-script removal.",
             Self::Mobile => "Viewport/device/geolocation/media emulation plus touch, swipe, and lower-level mouse tools.",
+            Self::AntigravityWork => "Antigravity work session integration for goal-oriented agents.",
             Self::All => "Every MCP tool, including the full typed CLI parity surface.",
         }
     }
@@ -271,6 +285,7 @@ impl ToolProfile {
             Self::Tabs => TABS_PROFILE_TOOLS,
             Self::React => REACT_PROFILE_TOOLS,
             Self::Mobile => MOBILE_PROFILE_TOOLS,
+            Self::AntigravityWork => ANTIGRAVITY_WORK_PROFILE_TOOLS,
             Self::All => &[],
         }
     }
@@ -485,6 +500,19 @@ const MOBILE_PROFILE_TOOLS: &[&str] = &[
     TOOL_DEVICE,
 ];
 
+const ANTIGRAVITY_WORK_PROFILE_TOOLS: &[&str] = &[
+    TOOL_WORK_SESSION_START,
+    TOOL_WORK_OBSERVE,
+    TOOL_WORK_EXECUTE,
+    TOOL_WORK_VERIFY,
+    TOOL_WORK_CHECKPOINT,
+    TOOL_WORK_RESUME,
+    TOOL_WORK_EXPORT,
+    TOOL_WORK_REQUEST_APPROVAL,
+    TOOL_WORK_STATUS,
+    TOOL_WORK_CANCEL,
+];
+
 /// Run the MCP stdio server until stdin closes or a `shutdown` request is
 /// received.
 pub fn run_mcp(args: &[String]) -> Result<(), String> {
@@ -523,13 +551,13 @@ fn parse_mcp_config(args: &[String]) -> Result<McpConfig, String> {
 
     while i < args.len() {
         let arg = &args[i];
-        if arg == "--tools" {
+        if arg == "--tools" || arg == "--profile" {
             let Some(value) = args.get(i + 1) else {
-                return Err("Missing value for --tools".to_string());
+                return Err(format!("Missing value for {}", arg));
             };
             tools_arg = Some(value.to_string());
             i += 2;
-        } else if let Some(value) = arg.strip_prefix("--tools=") {
+        } else if let Some(value) = arg.strip_prefix("--tools=").or_else(|| arg.strip_prefix("--profile=")) {
             tools_arg = Some(value.to_string());
             i += 1;
         } else {
@@ -899,6 +927,76 @@ fn tools() -> Vec<Value> {
             json!({
                 "all": { "type": "boolean", "default": false, "description": "Close all active sessions." }
             }),
+            &[],
+        ),
+        tool(
+            TOOL_WORK_SESSION_START,
+            "Start Work Session",
+            "Start a goal-oriented Antigravity work session.",
+            json!({}),
+            &[],
+        ),
+        tool(
+            TOOL_WORK_OBSERVE,
+            "Observe Work",
+            "Extract contextual observations for the current state.",
+            json!({}),
+            &[],
+        ),
+        tool(
+            TOOL_WORK_EXECUTE,
+            "Execute Work Step",
+            "Execute a single actionable step.",
+            json!({}),
+            &[],
+        ),
+        tool(
+            TOOL_WORK_VERIFY,
+            "Verify Work",
+            "Verify if the goal has been achieved.",
+            json!({}),
+            &[],
+        ),
+        tool(
+            TOOL_WORK_CHECKPOINT,
+            "Checkpoint Work",
+            "Save a durable checkpoint of the progress.",
+            json!({}),
+            &[],
+        ),
+        tool(
+            TOOL_WORK_RESUME,
+            "Resume Work",
+            "Resume from a saved checkpoint.",
+            json!({}),
+            &[],
+        ),
+        tool(
+            TOOL_WORK_EXPORT,
+            "Export Work Artifacts",
+            "Export findings and output files.",
+            json!({}),
+            &[],
+        ),
+        tool(
+            TOOL_WORK_REQUEST_APPROVAL,
+            "Request Approval",
+            "Ask user for approval on risky operations.",
+            json!({}),
+            &[],
+        ),
+        tool(
+            TOOL_WORK_STATUS,
+            "Work Status",
+            "Get the current work session status.",
+            json!({}),
+            &[],
+        ),
+        tool(
+            TOOL_WORK_CANCEL,
+            "Cancel Work",
+            "Cancel the running work session.",
+            json!({}),
             &[],
         ),
     ];
@@ -2235,6 +2333,22 @@ fn call_tool(params: Option<&Value>, config: &McpConfig) -> Result<Value, Protoc
         TOOL_CHAT => call_chat(arguments),
         TOOL_EVAL => call_eval(arguments),
         TOOL_CLOSE => call_close(arguments),
+        TOOL_WORK_SESSION_START |
+        TOOL_WORK_OBSERVE |
+        TOOL_WORK_EXECUTE |
+        TOOL_WORK_VERIFY |
+        TOOL_WORK_CHECKPOINT |
+        TOOL_WORK_RESUME |
+        TOOL_WORK_EXPORT |
+        TOOL_WORK_REQUEST_APPROVAL |
+        TOOL_WORK_STATUS |
+        TOOL_WORK_CANCEL => Ok(json!({
+            "isError": false,
+            "content": [{
+                "type": "text",
+                "text": "Not yet implemented (Antigravity work stub)."
+            }]
+        })),
         _ => unreachable!("known MCP tool missing call handler: {}", name),
     }
 }

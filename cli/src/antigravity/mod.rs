@@ -1,3 +1,9 @@
+pub mod installer;
+pub mod doctor;
+pub mod config;
+pub mod permissions;
+pub mod templates;
+pub mod mcp_compact;
 pub mod telemetry;
 pub mod versioning;
 pub mod feature_flags;
