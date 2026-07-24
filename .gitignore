@@ -13,6 +13,7 @@ bin/.install-method
 # Rust build artifacts
 cli/target/
 cli/*.o
+native-shim/target/
 
 # Logs
 *.log
@@ -27,6 +28,7 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+send.vbs
 
 # Python
 __pycache__/
@@ -36,6 +38,10 @@ __pycache__/
 *.jpeg
 *.jpg
 *.webm
+!extension/icons/icon-16.png
+!extension/icons/icon-32.png
+!extension/icons/icon-48.png
+!extension/icons/icon-128.png
 test/e2e/.dogfood-output/
 
 # Package manager

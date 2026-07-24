@@ -1,9 +1,10 @@
 {
   "name": "com.antigravity.agent_browser",
   "description": "Antigravity Agent Browser Native Messaging Host",
-  "path": "C:\\Users\\gabri\\Downloads\\web-controller\\agent-browser\\cli\\target\\debug\\agent-browser.exe",
+  "path": "__GENERATED_BY_AGENT_BROWSER_ANTIGRAVITY_INSTALL__",
   "type": "stdio",
   "allowed_origins": [
+    "chrome-extension://menkdnglfaljkgofohmhpblgiaehdibc/",
     "chrome-extension://gaenafhipmoehmnockpmmgjhgbkhodhg/"
   ]
 }

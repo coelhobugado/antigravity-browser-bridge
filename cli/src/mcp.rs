@@ -932,70 +932,92 @@ fn tools() -> Vec<Value> {
         tool(
             TOOL_WORK_SESSION_START,
             "Start Work Session",
-            "Start a goal-oriented Antigravity work session.",
-            json!({}),
+            "Connect to the Antigravity Chrome connector and list tabs explicitly authorized by the user.",
+            json!({
+                "requestId": { "type": "string", "description": "Optional correlation ID." }
+            }),
             &[],
         ),
         tool(
             TOOL_WORK_OBSERVE,
             "Observe Work",
-            "Extract contextual observations for the current state.",
-            json!({}),
+            "Observe an explicitly authorized browser tab.",
+            json!({
+                "requestId": { "type": "string", "description": "Optional correlation ID." },
+                "tabId": { "type": "integer", "minimum": 0, "description": "Authorized Chrome tab ID. Uses the active authorized tab when omitted." }
+            }),
             &[],
         ),
         tool(
             TOOL_WORK_EXECUTE,
             "Execute Work Step",
-            "Execute a single actionable step.",
-            json!({}),
-            &[],
+            "Execute one generic action in an explicitly authorized browser tab.",
+            json!({
+                "requestId": { "type": "string", "description": "Optional correlation ID." },
+                "tabId": { "type": "integer", "minimum": 0, "description": "Authorized Chrome tab ID." },
+                "action": { "type": "string", "enum": ["click", "fill", "type", "focus", "get_text"] },
+                "target": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "ref": { "type": "string", "description": "Element ref returned by the latest observation, for example e12." },
+                        "selector": { "type": "string" },
+                        "role": { "type": "string" },
+                        "name": { "type": "string" }
+                    }
+                },
+                "text": { "type": "string", "description": "Text for fill or type actions." }
+            }),
+            &["action", "target"],
         ),
         tool(
             TOOL_WORK_VERIFY,
             "Verify Work",
-            "Verify if the goal has been achieved.",
+            "Verify a postcondition. Returns not_implemented until evidence-based verification is available.",
             json!({}),
             &[],
         ),
         tool(
             TOOL_WORK_CHECKPOINT,
             "Checkpoint Work",
-            "Save a durable checkpoint of the progress.",
+            "Save a durable checkpoint. Returns not_implemented until durable checkpointing is available.",
             json!({}),
             &[],
         ),
         tool(
             TOOL_WORK_RESUME,
             "Resume Work",
-            "Resume from a saved checkpoint.",
+            "Resume from a checkpoint. Returns not_implemented until durable resume is available.",
             json!({}),
             &[],
         ),
         tool(
             TOOL_WORK_EXPORT,
             "Export Work Artifacts",
-            "Export findings and output files.",
+            "Export work artifacts. Returns not_implemented until artifact export is available.",
             json!({}),
             &[],
         ),
         tool(
             TOOL_WORK_REQUEST_APPROVAL,
             "Request Approval",
-            "Ask user for approval on risky operations.",
+            "Request a bound approval receipt. Returns not_implemented until approval binding is available.",
             json!({}),
             &[],
         ),
         tool(
             TOOL_WORK_STATUS,
             "Work Status",
-            "Get the current work session status.",
-            json!({}),
+            "Get connector status and list explicitly authorized tabs.",
+            json!({
+                "requestId": { "type": "string", "description": "Optional correlation ID." }
+            }),
             &[],
         ),
         tool(
             TOOL_WORK_CANCEL,
             "Cancel Work",
-            "Cancel the running work session.",
+            "Cancel running work. Returns not_implemented until cancellation is available.",
             json!({}),
             &[],
         ),

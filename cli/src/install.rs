@@ -1048,7 +1048,9 @@ mod tests {
         assert!(
             err.contains("Connection refused")
                 || err.contains("connection refused")
-                || err.contains("actively refused it"),
+                || err.contains("actively refused it")
+                || err.contains("os error 10061")
+                || err.contains("tcp connect error"),
             "expected 'connection refused' in error, got: {}",
             err
         );

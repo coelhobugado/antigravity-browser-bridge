@@ -1,8 +1,27 @@
-# agent-browser
+# Antigravity Browser Bridge
+
+## 0.1.0-beta.1
+
+<!-- release:start -->
+### Beta Release
+
+- Added the **Antigravity Work MCP profile** for operating explicitly authorized tabs in the user's existing Chrome session
+- Added a **generic Chrome extension** with a stable ID, per-tab authorization, DOM observation, element references, and native messaging
+- Added a **Windows native-host installer**, diagnostics, permission validation, and an authenticated loopback bridge
+- Added **Portuguese and English setup guides** for building, installing the extension, configuring Antigravity, and troubleshooting
+- Removed abandoned Antigravity scaffolding and the inherited npm release workflow
+
+### Credits
+
+- Built on [vercel-labs/agent-browser](https://github.com/vercel-labs/agent-browser)
+
+### Contributors
+
+- @coelhobugado
+<!-- release:end -->
 
 ## 0.33.0
 
-<!-- release:start -->
 ### New Features
 
 - Added **axe-core accessibility audits** with `agent-browser a11y [url]`, WCAG tag filtering, selector scoping, iframe-aware text and JSON results, an embedded offline and CSP-safe audit engine, and a matching MCP tool (#1596)
@@ -10,7 +29,6 @@
 ### Contributors
 
 - @ctate
-<!-- release:end -->
 
 ## 0.32.4
 

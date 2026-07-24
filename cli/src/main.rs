@@ -966,6 +966,17 @@ fn main() {
     }
 
     let args: Vec<String> = env::args().skip(1).collect();
+
+    // Chrome launches a Native Messaging host with the extension origin as the
+    // first argument. Normal CLI commands can still contain extension URLs.
+    if args
+        .first()
+        .is_some_and(|arg| arg.starts_with("chrome-extension://"))
+    {
+        crate::work::chrome_extension::run_native_host_loop();
+        return;
+    }
+
     let mut flags = parse_flags(&args);
     if flags.restore_uses_session {
         flags.restore = Some(flags.session.clone());
@@ -1100,22 +1111,50 @@ fn main() {
                     "global"
                 };
                 if scope == "workspace" {
-                    antigravity::installer::install_workspace(".");
+                    match antigravity::installer::install_workspace(".") {
+                        Ok(path) => println!("Installed native host: {}", path.display()),
+                        Err(error) => {
+                            eprintln!("{} {}", color::error_indicator(), error);
+                            exit(1);
+                        }
+                    }
                 } else {
-                    antigravity::installer::install_global();
+                    match antigravity::installer::install_global() {
+                        Ok(path) => println!("Installed native host: {}", path.display()),
+                        Err(error) => {
+                            eprintln!("{} {}", color::error_indicator(), error);
+                            exit(1);
+                        }
+                    }
                 }
                 return;
             }
             Some("doctor") => {
-                let _ = antigravity::doctor::check_installation();
+                match antigravity::doctor::check_installation() {
+                    Ok(message) => println!("{message}"),
+                    Err(error) => {
+                        eprintln!("{} {}", color::error_indicator(), error);
+                        exit(1);
+                    }
+                }
                 return;
             }
             Some("permissions") => {
-                let _ = antigravity::permissions::validate_permissions();
+                match antigravity::permissions::validate_permissions() {
+                    Ok(message) => println!("{message}"),
+                    Err(error) => {
+                        eprintln!("{} {}", color::error_indicator(), error);
+                        exit(1);
+                    }
+                }
                 return;
             }
             Some("uninstall") => {
-                antigravity::installer::uninstall();
+                if let Err(error) = antigravity::installer::uninstall() {
+                    eprintln!("{} {}", color::error_indicator(), error);
+                    exit(1);
+                }
+                println!("Uninstalled Antigravity native host");
                 return;
             }
             _ => {

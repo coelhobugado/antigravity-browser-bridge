@@ -3317,6 +3317,8 @@ Tool profiles:
   tabs       Back/forward/reload, tabs, windows, frames, dialogs
   react      React tree/inspect/renders/suspense, vitals, pushstate
   mobile     Viewport/device/geolocation/media, touch, swipe, mouse, keyboard
+  antigravity-work
+             Explicitly authorized personal Chrome tabs through the connector
   all        Every MCP tool, including the full typed CLI parity surface
 
 Common tools include:
@@ -3359,6 +3361,33 @@ Environment:
   AGENT_BROWSER_SESSION          Default browser session
   AGENT_BROWSER_SOCKET_DIR       Daemon socket directory
   AGENT_BROWSER_CONFIG           Config file loaded by tool invocations
+"##
+        }
+
+        "antigravity" => {
+            r##"
+agent-browser antigravity - Manage the Antigravity Chrome connector
+
+Usage: agent-browser antigravity <subcommand>
+
+Subcommands:
+  install                  Register this executable as the Chrome native host
+  install --scope workspace
+                           Install from the current workspace
+  doctor                   Validate the generated native host manifest
+  permissions              Show and validate the authorized extension origin
+  uninstall                Remove the native host registration and manifest
+
+Environment:
+  AGENT_BROWSER_EXTENSION_ID
+                           Advanced override for a separately repackaged build
+
+The bundled extension has a stable ID derived from its manifest key. Normal
+installation never requires copying an extension ID or passing one to an agent.
+
+The extension does not receive access to every website automatically. Click its
+toolbar icon in each tab you want to authorize. Authorization survives same-origin
+navigation, is revoked on cross-origin navigation, and can be revoked by detaching.
 "##
         }
 
@@ -3514,6 +3543,7 @@ Core Commands:
   eval <js>                  Run JavaScript
   connect <port|url>         Connect to browser via CDP
   close [--all]              Close browser (--all closes every session)
+  antigravity <subcommand>   Install or diagnose the personal Chrome connector
 
 Navigation:
   back                       Go back

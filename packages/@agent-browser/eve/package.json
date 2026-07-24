@@ -1,6 +1,6 @@
 {
   "name": "@agent-browser/eve",
-  "version": "0.33.0",
+  "version": "0.1.0-beta.1",
   "description": "eve extension that gives agents a full browser automation tool set backed by agent-browser",
   "type": "module",
   "sideEffects": false,
@@ -44,13 +44,13 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vercel-labs/agent-browser",
+    "url": "https://github.com/coelhobugado/antigravity-browser-bridge",
     "directory": "packages/@agent-browser/eve"
   },
   "bugs": {
-    "url": "https://github.com/vercel-labs/agent-browser/issues"
+    "url": "https://github.com/coelhobugado/antigravity-browser-bridge/issues"
   },
-  "homepage": "https://agent-browser.dev",
+  "homepage": "https://github.com/coelhobugado/antigravity-browser-bridge",
   "publishConfig": {
     "access": "public"
   },

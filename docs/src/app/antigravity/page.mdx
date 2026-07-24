@@ -1,0 +1,44 @@
+# Antigravity Chrome connector
+
+The Antigravity connector lets an agent operate explicitly authorized tabs in the user's existing Chrome session. It is generic and can be used with X, LinkedIn, and other websites. It does not grant silent access to every tab.
+
+## Install
+
+Load the unpacked extension from the repository's `extension/` directory. Its manifest contains a fixed public key, so Chrome assigns the same ID on every machine. Normal installation does not require copying an extension ID or giving one to an AI.
+
+```bash
+agent-browser antigravity install
+agent-browser antigravity doctor
+agent-browser antigravity permissions
+```
+
+Restart the extension after registering the native host.
+
+`AGENT_BROWSER_EXTENSION_ID` is available only as an advanced override when testing a separately repackaged build with a different key.
+
+## Authorize a tab
+
+Open the tab you want the agent to use and click the connector icon. The badge changes to `ON`. Authorization is held in memory, remains active during navigation on the same origin, and is revoked when the tab changes to another origin, the extension restarts, or the browser closes.
+
+The extension uses `activeTab` and runtime script injection. It does not inject a content script into every website at startup.
+
+## Configure MCP
+
+```json
+{
+  "mcpServers": {
+    "agent-browser-work": {
+      "command": "agent-browser",
+      "args": ["mcp", "--tools", "antigravity-work"]
+    }
+  }
+}
+```
+
+The compact profile lists authorized tabs, observes a selected tab, and executes generic element actions. Operations that do not yet have durable implementations return `not_implemented` instead of placeholder success.
+
+## Uninstall
+
+```bash
+agent-browser antigravity uninstall
+```
