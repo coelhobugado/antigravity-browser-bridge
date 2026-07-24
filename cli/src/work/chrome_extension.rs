@@ -256,11 +256,8 @@ pub fn run_native_host_loop() {
     });
 
     let mut stdin = io::stdin();
-    loop {
-        match read_native_message(&mut stdin) {
-            Ok(Some(message)) => deliver_response(&pending, &message),
-            Ok(None) | Err(_) => break,
-        }
+    while let Ok(Some(message)) = read_native_message(&mut stdin) {
+        deliver_response(&pending, &message);
     }
 }
 

@@ -1096,7 +1096,7 @@ fn required_work_id(args: &Value) -> Result<WorkId, WorkError> {
 fn request_id(args: &Value) -> String {
     args.get("requestId")
         .and_then(Value::as_str)
-        .unwrap_or_else(|| "request-generated")
+        .unwrap_or("request-generated")
         .to_string()
 }
 

@@ -4,6 +4,7 @@
 use serde_json::json;
 use std::fs;
 use std::path::{Path, PathBuf};
+#[cfg(windows)]
 use std::process::Command;
 
 const HOST_NAME: &str = "com.antigravity.agent_browser";
