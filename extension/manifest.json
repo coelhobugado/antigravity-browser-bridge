@@ -1,14 +1,16 @@
 {
   "manifest_version": 3,
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtnSwi1B4IHHanCM+qhHSKbPRt/uWeWqQRV15qsnOqamIN8K5iWgGtyBbAiJ3TyByiLmNWzEBAh0SR635kTGNASMY+wLEQSgprE3jqKKeEntpAv5hmLIzhZ+8snUZhj9MTjWn4Cx8YERToKIklY0B6FeUqAdKrTwlfGzuYKKaRb8mPJCM0SCCcDvGBkx5aFfjrXzRNah+SrAy0YydmoLuaZuCLiwH9Cc6/IFcpByOWA6+awcvdWAbhZmr/+yXqz2dlss9eYP8zrREYY13zuaa2AJ7EpTYNG71drlfPy/1jPFnvUiVhsx7z37g/3omsc0LkQDszvnjBqqif+9euP4kBwIDAQAB",
-  "name": "Antigravity Agent Connector",
-  "version": "1.1.2",
-  "description": "Permite ao Antigravity agent operar o navegador nativamente com as contas ativas do usuário.",
+  "name": "__MSG_extName__",
+  "version": "1.2.0",
+  "default_locale": "pt_BR",
+  "description": "__MSG_extDescription__",
   "permissions": [
     "nativeMessaging",
     "activeTab",
     "scripting",
-    "tabs"
+    "tabs",
+    "storage"
   ],
   "background": {
     "service_worker": "background.js"
@@ -20,7 +22,8 @@
     "128": "icons/icon-128.png"
   },
   "action": {
-    "default_title": "Autorizar esta aba para o Antigravity",
+    "default_title": "Antigravity Agent Connector",
+    "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png",

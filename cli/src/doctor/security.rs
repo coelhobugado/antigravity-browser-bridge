@@ -38,22 +38,31 @@ pub(super) fn check(checks: &mut Vec<Check>) {
             );
         }
     } else if key_file.exists() {
-        let mut msg = format!("Encryption key file present: {}", key_file.display());
-        let mut status = Status::Pass;
-        let mut fix: Option<String> = None;
         #[cfg(unix)]
-        if let Ok(meta) = fs::metadata(&key_file) {
-            let mode = meta.permissions().mode() & 0o777;
-            if mode & 0o077 != 0 {
-                status = Status::Warn;
-                msg = format!(
-                    "Encryption key file is too permissive ({:o}): {}",
-                    mode,
-                    key_file.display()
-                );
-                fix = Some(format!("chmod 600 {}", key_file.display()));
+        let (msg, status, fix) = {
+            let mut msg = format!("Encryption key file present: {}", key_file.display());
+            let mut status = Status::Pass;
+            let mut fix = None;
+            if let Ok(meta) = fs::metadata(&key_file) {
+                let mode = meta.permissions().mode() & 0o777;
+                if mode & 0o077 != 0 {
+                    status = Status::Warn;
+                    msg = format!(
+                        "Encryption key file is too permissive ({:o}): {}",
+                        mode,
+                        key_file.display()
+                    );
+                    fix = Some(format!("chmod 600 {}", key_file.display()));
+                }
             }
-        }
+            (msg, status, fix)
+        };
+        #[cfg(not(unix))]
+        let (msg, status, fix): (String, Status, Option<String>) = (
+            format!("Encryption key file present: {}", key_file.display()),
+            Status::Pass,
+            None,
+        );
         let mut check = Check::new("security.encryption_key", category, status, msg);
         if let Some(f) = fix {
             check = check.with_fix(f);

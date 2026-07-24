@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity Connector</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    body {
+      width: 360px;
+      margin: 0;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .badge {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge.on { background-color: rgba(34, 197, 94, 0.2); color: var(--success); border: 1px solid var(--success); }
+    .badge.off { background-color: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+    .badge.busy { background-color: rgba(59, 130, 246, 0.2); color: var(--primary); border: 1px solid var(--primary); }
+    .badge.wait { background-color: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+    .badge.err { background-color: rgba(239, 68, 68, 0.3); color: #fca5a5; border: 1px solid var(--danger); }
+
+    .card {
+      background-color: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .info-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; }
+    .info-value { font-size: 13px; font-weight: 500; word-break: break-all; margin-bottom: 8px; }
+    .info-value:last-child { margin-bottom: 0; }
+
+    .actions { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .btn-row { display: flex; gap: 8px; }
+    .btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .btn-primary { background-color: var(--primary); color: white; }
+    .btn-primary:hover { background-color: var(--primary-hover); }
+    .btn-danger { background-color: var(--danger); color: white; }
+    .btn-danger:hover { background-color: var(--danger-hover); }
+    .btn-secondary { background-color: var(--border); color: var(--text); }
+    .btn-secondary:hover { background-color: #475569; }
+
+    .section-title { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+    .tab-list { display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto; }
+    .tab-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: rgba(255, 255, 255, 0.04);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+    .tab-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+    .btn-icon { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; padding: 2px 4px; }
+
+    .activity-list { display: flex; flex-direction: column; gap: 6px; max-height: 100px; overflow-y: auto; font-size: 11px; color: var(--text-muted); }
+    .activity-item { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">Antigravity Connector</div>
+    <div id="statusBadge" class="badge off">OFF</div>
+  </div>
+
+  <div class="card">
+    <div class="info-label">Aba Ativa</div>
+    <div id="currentTabTitle" class="info-value">Carregando...</div>
+    <div class="info-label">Origem</div>
+    <div id="currentTabOrigin" class="info-value">-</div>
+  </div>
+
+  <div class="actions">
+    <div class="btn-row">
+      <button id="btnAuthorize" class="btn btn-primary">Autorizar Aba</button>
+      <button id="btnRevoke" class="btn btn-danger">Revogar</button>
+    </div>
+    <div class="btn-row">
+      <button id="btnRevokeAll" class="btn btn-secondary">Revogar Todas</button>
+      <button id="btnDiagnostics" class="btn btn-secondary">Diagnóstico</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Abas Autorizadas</div>
+    <div id="authorizedTabList" class="tab-list">
+      <div style="font-size:12px; color:var(--text-muted);">Nenhuma aba autorizada.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:0;">
+    <div class="section-title">Atividade Recente</div>
+    <div id="recentActivityList" class="activity-list">
+      <div>Nenhuma atividade registrada.</div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.1.0-beta.3
+
+<p className="text-[#888] text-sm">July 24, 2026</p>
+
+### Fixes
+
+- Aligned the extension and native host on the same protocol version and restored the connection handshake.
+- Made installation configure `~/.gemini/config/mcp_config.json` automatically while preserving existing servers and rejecting malformed JSON.
+- Removed disconnected experimental modules that simulated IPC, policies, and domain adapters without executing the real flow.
+- Hardened the popup and content script with cryptographic nonces, safe rendering, session authorization, and improved element resolution.
+- Prevented `doctor` from hanging while querying Chrome on Windows and made the recording test respect its optional FFmpeg dependency.
+
+### Improvements
+
+- Updated the extension to `1.2.0` with tab authorization controls, connection status, and recent activity.
+- Updated the Portuguese and English guides, CLI documentation, and core skill.
+
+---
+
 ## v0.1.0-beta.2
 
 <p className="text-[#888] text-sm">July 24, 2026</p>

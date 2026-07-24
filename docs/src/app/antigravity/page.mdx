@@ -14,26 +14,19 @@ agent-browser antigravity permissions
 
 Restart the extension after registering the native host.
 
+The install command also preserves existing MCP servers while adding the `agent-browser` entry to `~/.gemini/config/mcp_config.json`. It refuses to overwrite malformed JSON. Installation is a local setup operation and is intentionally not exposed as an MCP tool.
+
 `AGENT_BROWSER_EXTENSION_ID` is available only as an advanced override when testing a separately repackaged build with a different key.
 
 ## Authorize a tab
 
-Open the tab you want the agent to use and click the connector icon. The badge changes to `ON`. Authorization is held in memory, remains active during navigation on the same origin, and is revoked when the tab changes to another origin, the extension restarts, or the browser closes.
+Open the tab you want the agent to use, click the connector icon, and select **Authorize Tab** in the popup. The badge changes to `ON`. Authorization is retained for the browser session, remains active during navigation on the same origin, and is revoked when the tab changes to another origin, the user revokes access, or the browser session ends.
 
 The extension uses `activeTab` and runtime script injection. It does not inject a content script into every website at startup.
 
 ## Configure MCP
 
-```json
-{
-  "mcpServers": {
-    "agent-browser-work": {
-      "command": "agent-browser",
-      "args": ["mcp", "--tools", "antigravity-work"]
-    }
-  }
-}
-```
+`agent-browser antigravity install` configures MCP automatically. Restart Antigravity after installation so it reloads the server configuration.
 
 The profile is backed by the typed WorkService. Start a work identity with `agent_browser_work_session_start`, then pass its `workId` to observe, execute, verify, status, cancel, checkpoint, resume, export, approval, and journal operations. Effects accept an `idempotencyKey`, all calls have finite deadlines, and transitions are persisted to a redacted local journal. Public or destructive actions should request approval before execution.
 

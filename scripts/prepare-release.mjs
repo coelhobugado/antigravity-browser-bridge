@@ -13,5 +13,12 @@ run(process.execPath, ["scripts/check-encoding.mjs"]);
 run(process.execPath, ["scripts/validate-evals.mjs"]);
 run("python", ["scripts/package-extension.py", "--output", path.join(output, "antigravity-browser-bridge-extension.zip")]);
 run(process.execPath, ["scripts/generate-sbom.mjs", "--output", path.join(output, "sbom.cdx.json")]);
-run(process.execPath, ["scripts/measure-baseline.mjs", "--measure-runtime", "--output", path.join(output, "baseline.json")]);
+run(process.execPath, [
+  "scripts/measure-baseline.mjs",
+  "--measure-runtime",
+  "--extension-zip",
+  path.join(output, "antigravity-browser-bridge-extension.zip"),
+  "--output",
+  path.join(output, "baseline.json"),
+]);
 console.log(`Release artifacts prepared in ${output}`);
