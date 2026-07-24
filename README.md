@@ -1,12 +1,22 @@
 # Antigravity Browser Bridge
 
-> Ponte open source entre agentes compatíveis com MCP e o Chrome já autenticado do usuário, com autorização explícita por aba e verificação de ações no DOM.
+> Ponte open source entre agentes compatíveis com MCP e o Chrome já autenticado do usuário, com autorização explícita por aba, execução persistente de tarefas e verificação de ações no DOM.
 
-[English documentation](README.en.md) · [Contribuir](CONTRIBUTING.md) · [Segurança](SECURITY.md) · [Roadmap](docs/ANTIGRAVITY_APEX_PLAN.md) · [Changelog](CHANGELOG.md)
+[English documentation](README.en.md) · [Contribuir](CONTRIBUTING.md) · [Segurança](SECURITY.md) · [Roadmap](docs/ANTIGRAVITY_APEX_PLAN.md) · [Changelog](CHANGELOG.md) · [Relação com o upstream](UPSTREAM.md)
 
-> **Status:** `0.1.0-beta.2`. Use com atenção em contas pessoais e sempre revise ações importantes.
+> **Status:** `0.1.0-beta.3`. Use com atenção em contas pessoais e sempre revise ações importantes.
 
 ![Ícone do Antigravity Browser Bridge](extension/icons/icon-128.png)
+
+## Visão geral das versões
+
+| Componente | Versão atual |
+|---|---:|
+| Antigravity Browser Bridge | `0.1.0-beta.3` |
+| Extensão Chrome | `1.2.0` |
+| Base agent-browser | linha upstream `0.33.x` |
+
+As versões são independentes: a extensão, o Bridge e a base upstream não seguem necessariamente a mesma numeração.
 
 ## O problema que este projeto resolve
 
@@ -19,12 +29,15 @@ O Antigravity Browser Bridge oferece uma camada mais determinística para agente
 3. o native host mantém uma ponte autenticada com a extensão;
 4. o usuário autoriza explicitamente cada aba;
 5. a extensão observa o DOM e gera referências estruturadas;
-6. o agente lê, preenche, clica e verifica o resultado por essas referências.
+6. o `WorkService` controla estado, aprovação, execução, verificação e recuperação;
+7. o agente registra o resultado e pode retomar tarefas interrompidas sem repetir efeitos confirmados.
 
 ```text
 Agente MCP
    ↓
 Servidor MCP / CLI Rust
+   ↓
+WorkService tipado
    ↓
 Native Messaging Host
    ↓
@@ -39,16 +52,51 @@ O projeto é derivado do [agent-browser da Vercel](https://github.com/vercel-lab
 
 - perfil MCP `antigravity-work`;
 - reutilização do Chrome já aberto e de sessões autenticadas existentes;
-- extensão genérica para Chrome;
+- extensão própria para Chrome;
 - native messaging no Windows;
 - autorização explícita por aba;
 - persistência apenas dentro do mesmo domínio;
 - revogação automática ao mudar de domínio;
-- diagnóstico e instalação do native host;
-- orientação para confirmação de ações públicas, destrutivas ou financeiras;
+- `WorkService` tipado com máquina de estados;
+- deadlines, idempotência e cancelamento cooperativo;
+- journal append-only, checkpoints e retomada;
+- aprovação explícita antes de ações sensíveis;
+- verificação posterior no DOM;
+- exportação redigida para reduzir exposição de dados sensíveis;
+- diagnóstico e instalação automática do native host e do MCP;
 - roadmap próprio para recuperação de falhas, evidência de sucesso e controle de risco.
 
 Essas adições transformam a base upstream em uma ponte específica para agentes que precisam trabalhar com sessões reais sem receber acesso silencioso a todo o navegador.
+
+Consulte [UPSTREAM.md](UPSTREAM.md) para ver o que é herdado, o que é específico do Bridge e como o histórico upstream é preservado.
+
+## Runtime de tarefas
+
+O perfil `antigravity-work` usa um `WorkService` separado do adapter MCP. Cada tarefa possui identidade própria, estado, tentativas, deadline, chave de idempotência e journal persistente.
+
+Fluxo principal:
+
+```text
+created → planning → waiting_for_tab → observing
+observing → waiting_for_approval → executing → verifying → completed
+executing/verifying → recovering → observing ou executing
+qualquer estado não terminal → failed ou cancelled
+```
+
+Operações disponíveis incluem:
+
+- iniciar sessão;
+- observar a aba autorizada;
+- solicitar aprovação;
+- executar uma etapa;
+- verificar o resultado;
+- consultar status e journal;
+- cancelar;
+- criar checkpoint;
+- retomar;
+- exportar estado redigido.
+
+Transições inválidas são rejeitadas antes de alterar o journal. Efeitos confirmados são protegidos contra repetição por idempotência. O contrato completo está em [docs/WORK_CONTRACT.md](docs/WORK_CONTRACT.md).
 
 ## Casos de uso
 
@@ -56,6 +104,7 @@ Essas adições transformam a base upstream em uma ponte específica para agente
 - preencher formulários em abas já autenticadas;
 - consultar sistemas web sem compartilhar cookies com o modelo;
 - automatizar tarefas repetitivas com verificação posterior no DOM;
+- retomar fluxos interrompidos a partir de checkpoints;
 - integrar Antigravity ou outro cliente MCP a fluxos no navegador;
 - testar agentes em aplicações web reais com limites explícitos de autorização.
 
@@ -71,7 +120,11 @@ Funciona atualmente:
 - persistência da autorização no mesmo domínio;
 - revogação automática em navegação entre domínios;
 - ID estável da extensão;
-- instalação e diagnóstico do native host no Windows.
+- popup para autorizar e revogar abas;
+- status da conexão e atividade recente;
+- instalação e diagnóstico do native host no Windows;
+- configuração automática do MCP no Antigravity;
+- WorkService com journal, checkpoints, retomada, idempotência e verificação.
 
 Limitações da versão beta:
 
@@ -178,6 +231,8 @@ Testes end-to-end com Chrome:
 cargo test e2e --manifest-path cli\Cargo.toml -- --ignored --test-threads=1
 ```
 
+O CI também valida sincronização de versões, Clippy, extensão, encoding, baselines, empacotamento, SBOM e instalação global do pacote.
+
 ## Como contribuir
 
 Contribuições são bem-vindas, especialmente em:
@@ -207,6 +262,6 @@ O plano detalhado está em [docs/ANTIGRAVITY_APEX_PLAN.md](docs/ANTIGRAVITY_APEX
 
 ## Créditos e licença
 
-Baseado no [vercel-labs/agent-browser](https://github.com/vercel-labs/agent-browser). O projeto preserva a licença Apache 2.0 e os avisos aplicáveis. Consulte [LICENSE](LICENSE).
+Baseado no [vercel-labs/agent-browser](https://github.com/vercel-labs/agent-browser). O projeto preserva a licença Apache 2.0 e os avisos aplicáveis. Consulte [LICENSE](LICENSE) e [UPSTREAM.md](UPSTREAM.md).
 
 Antigravity Browser Bridge não é um produto oficial da Vercel, Google, X, LinkedIn ou Anthropic.
