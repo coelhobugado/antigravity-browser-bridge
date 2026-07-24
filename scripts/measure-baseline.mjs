@@ -8,6 +8,10 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const args = new Set(process.argv.slice(2));
 const outputIndex = process.argv.indexOf("--output");
 const output = outputIndex >= 0 ? path.resolve(process.cwd(), process.argv[outputIndex + 1]) : path.join(root, "artifacts", "antigravity-baseline.json");
+const extensionZipIndex = process.argv.indexOf("--extension-zip");
+const extensionZip = extensionZipIndex >= 0
+  ? path.resolve(process.cwd(), process.argv[extensionZipIndex + 1])
+  : path.join(root, "artifacts", "antigravity-browser-bridge-extension.zip");
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 
 function walkBytes(target) {
@@ -74,8 +78,6 @@ const binaries = Object.fromEntries(binaryCandidates.map((relative) => {
   const file = path.join(root, relative);
   return [relative, fs.existsSync(file) && fs.statSync(file).isFile() && fs.statSync(file).size > 0 ? walkBytes(file) : { bytes: 0, files: 0, present: false }];
 }));
-const extensionZip = path.join(root, "artifacts", "antigravity-browser-bridge-extension.zip");
-
 const tracked = execFileSync("git", ["ls-files", "-z"], { cwd: root }).toString().split("\0").filter(Boolean);
 const trackedBytes = tracked.reduce((total, relative) => total + walkBytes(path.join(root, relative)).bytes, 0);
 const extension = walkBytes(path.join(root, "extension"));

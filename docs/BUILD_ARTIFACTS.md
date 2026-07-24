@@ -18,4 +18,4 @@ Nunca inclua `cli/target`, `node_modules` ou `.pnpm-store` em um ZIP de release.
 
 ## Limites da versão beta
 
-Os limites versionados estão em `docs/baseline/v0.1.0-beta.2.json`. O CI falha se o código rastreado ou a extensão ultrapassarem seus limites. Caches são informativos e não bloqueiam releases.
+O histórico de medições versionadas está em `docs/baseline/`. O CI falha se o código rastreado ou a extensão ultrapassarem seus limites. Caches são informativos e não bloqueiam releases.

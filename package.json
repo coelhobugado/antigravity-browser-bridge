@@ -1,6 +1,6 @@
 {
   "name": "antigravity-browser-bridge",
-  "version": "0.1.0-beta.2",
+  "version": "0.1.0-beta.3",
   "description": "Native Chrome and MCP bridge for Antigravity agents",
   "private": true,
   "type": "module",

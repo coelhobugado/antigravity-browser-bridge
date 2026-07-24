@@ -687,6 +687,8 @@ Tool invocations use the same config files and environment variables as the CLI.
 
 ### Antigravity work profile
 
+Run `agent-browser antigravity install` once on Windows to register the native host and add the MCP server to `~/.gemini/config/mcp_config.json`. The installer preserves other servers and refuses malformed JSON. This local setup action is intentionally not exposed through MCP.
+
 Start the connector profile with `agent-browser mcp --tools antigravity-work`. Call `agent_browser_work_session_start` first and pass its `workId` to subsequent operations. The service persists state transitions to a local append-only journal and exposes `agent_browser_work_observe`, `agent_browser_work_execute`, `agent_browser_work_verify`, `agent_browser_work_status`, `agent_browser_work_cancel`, `agent_browser_work_checkpoint`, `agent_browser_work_resume`, `agent_browser_work_export`, `agent_browser_work_request_approval`, and `agent_browser_work_journal`.
 
 Use an `idempotencyKey` when retrying an effect. Work operations have finite task, transport, step, and verification deadlines. Public or destructive actions should request approval before execution. See [the versioned work contract](/work-contract) for state transitions, error codes, checkpoint fields, and journal retention.

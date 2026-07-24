@@ -154,6 +154,7 @@ fn cleanup_restore_state_files(restore_key: &str) {
     }
 }
 
+#[cfg(unix)]
 async fn send_raw_http_request(port: u64, request: &str) -> String {
     let mut stream = tokio::net::TcpStream::connect(format!("127.0.0.1:{port}"))
         .await
@@ -5650,6 +5651,15 @@ async fn e2e_upload_with_css_selector() {
 #[tokio::test]
 #[ignore]
 async fn e2e_recording_inherits_viewport() {
+    let ffmpeg_available = std::process::Command::new("ffmpeg")
+        .arg("-version")
+        .output()
+        .is_ok_and(|output| output.status.success());
+    if !ffmpeg_available {
+        eprintln!("skipping recording viewport E2E test because ffmpeg is unavailable");
+        return;
+    }
+
     let mut state = DaemonState::new();
 
     let resp = execute_command(

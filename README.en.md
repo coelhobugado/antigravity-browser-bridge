@@ -91,24 +91,24 @@ Download the extension from the [Releases page](https://github.com/coelhobugado/
 3. Enable Developer mode.
 4. Select **Load unpacked**.
 5. Select the extracted directory containing `manifest.json`.
-6. Confirm that extension version `1.1.2` is displayed.
+6. Confirm that extension version `1.2.0` is displayed.
 
 The official extension ID is stable. Users and agents do not need to copy it because the installer already authorizes it.
 
 ## Configure MCP in Antigravity
 
-On Windows, edit:
+The `antigravity install` command registers the native host and automatically configures the MCP server in:
 
 ```text
 C:\Users\YOUR_USER\.gemini\config\mcp_config.json
 ```
 
-Use an absolute executable path:
+The installer preserves existing servers and refuses to overwrite malformed JSON. The resulting entry uses the absolute executable path:
 
 ```json
 {
   "mcpServers": {
-    "antigravity-browser-bridge": {
+    "agent-browser": {
       "command": "C:\\PATH\\antigravity-browser-bridge\\bin\\agent-browser-win32-x64.exe",
       "args": ["mcp", "--tools", "antigravity-work"]
     }
@@ -116,14 +116,12 @@ Use an absolute executable path:
 }
 ```
 
-If the file already contains other servers, add only the `antigravity-browser-bridge` entry inside `mcpServers`. Do not erase existing configuration.
-
-An AI with filesystem access may configure this automatically, but it should locate the real executable, preserve existing MCP servers, produce valid JSON, reload Antigravity, and verify that the `agent_browser_work_*` tools appear.
+No extension ID needs to be copied. Restart Antigravity after installation and verify that the `agent_browser_work_*` tools appear.
 
 ## Usage
 
 1. Open the target website in Chrome.
-2. Click the extension icon in that tab.
+2. Click the extension icon and select **Authorize Tab** in the popup.
 3. Confirm that the badge shows `ON`.
 4. Ask the agent to observe before acting.
 5. Require a second observation to verify posts, deletions, and messages.
@@ -136,7 +134,7 @@ Use the agent_browser_work tools. List the authorized tabs, observe the LinkedIn
 
 ## Security
 
-The extension does not silently receive access to the entire browser. The user must authorize each tab with a click. Authorization is removed when the tab changes origin or closes.
+The extension does not silently receive access to the entire browser. The user must authorize each tab in the popup. Authorization is removed when the tab changes origin, closes, is explicitly revoked, or the browser session ends.
 
 Recommended practices:
 

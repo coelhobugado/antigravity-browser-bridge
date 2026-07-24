@@ -9,7 +9,6 @@ use std::process::Command;
 
 const HOST_NAME: &str = "com.antigravity.agent_browser";
 const OFFICIAL_EXTENSION_ID: &str = "menkdnglfaljkgofohmhpblgiaehdibc";
-const LEGACY_DEVELOPMENT_EXTENSION_ID: &str = "gaenafhipmoehmnockpmmgjhgbkhodhg";
 
 fn integration_dir() -> PathBuf {
     dirs::data_local_dir()
@@ -19,10 +18,7 @@ fn integration_dir() -> PathBuf {
 }
 
 fn extension_ids() -> Vec<String> {
-    let mut ids = vec![
-        OFFICIAL_EXTENSION_ID.to_string(),
-        LEGACY_DEVELOPMENT_EXTENSION_ID.to_string(),
-    ];
+    let mut ids = vec![OFFICIAL_EXTENSION_ID.to_string()];
     if let Ok(id) = std::env::var("AGENT_BROWSER_EXTENSION_ID") {
         if !id.is_empty() && !ids.contains(&id) {
             ids.push(id);
@@ -33,6 +29,10 @@ fn extension_ids() -> Vec<String> {
 
 fn host_manifest_path() -> PathBuf {
     integration_dir().join("host-manifest.json")
+}
+
+fn mcp_config_path(home: &Path) -> PathBuf {
+    home.join(".gemini").join("config").join("mcp_config.json")
 }
 
 fn write_host_manifest(executable: &Path) -> Result<PathBuf, String> {
@@ -143,6 +143,59 @@ pub fn uninstall() -> Result<(), String> {
     Ok(())
 }
 
+/// Idempotently configures Antigravity MCP settings.
+pub fn configure_mcp() -> Result<PathBuf, String> {
+    let home = dirs::home_dir().ok_or_else(|| "Failed to find home directory".to_string())?;
+    let config_path = mcp_config_path(&home);
+
+    if let Some(parent) = config_path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|error| format!("failed to create MCP config directory: {error}"))?;
+    }
+
+    let executable = std::env::current_exe()
+        .map_err(|error| format!("failed to locate executable: {error}"))?
+        .canonicalize()
+        .map_err(|error| format!("failed to resolve executable path: {error}"))?;
+    let executable = executable.to_string_lossy();
+    let executable = executable
+        .strip_prefix(r"\\?\")
+        .unwrap_or(&executable)
+        .to_string();
+    let mut config: serde_json::Value = if config_path.exists() {
+        let content = fs::read_to_string(&config_path)
+            .map_err(|error| format!("failed to read MCP config: {error}"))?;
+        serde_json::from_str(&content)
+            .map_err(|error| format!("refusing to overwrite invalid MCP config: {error}"))?
+    } else {
+        json!({})
+    };
+
+    if !config.is_object() {
+        return Err(
+            "refusing to overwrite MCP config because its root is not an object".to_string(),
+        );
+    }
+    if !config
+        .get("mcpServers")
+        .map(|v| v.is_object())
+        .unwrap_or(false)
+    {
+        config["mcpServers"] = json!({});
+    }
+
+    config["mcpServers"]["agent-browser"] = json!({
+        "command": executable,
+        "args": ["mcp", "--tools", "antigravity-work"]
+    });
+
+    let bytes = serde_json::to_vec_pretty(&config)
+        .map_err(|error| format!("failed to serialize MCP config: {error}"))?;
+    fs::write(&config_path, bytes)
+        .map_err(|error| format!("failed to write MCP config: {error}"))?;
+    Ok(config_path)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -154,5 +207,14 @@ mod tests {
             .bytes()
             .all(|byte| matches!(byte, b'a'..=b'p')));
         assert!(extension_ids().contains(&OFFICIAL_EXTENSION_ID.to_string()));
+    }
+
+    #[test]
+    fn antigravity_mcp_config_uses_gemini_config_directory() {
+        let home = Path::new(r"C:\Users\example");
+        assert_eq!(
+            mcp_config_path(home),
+            home.join(".gemini").join("config").join("mcp_config.json")
+        );
     }
 }

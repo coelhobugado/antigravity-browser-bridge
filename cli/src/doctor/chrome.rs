@@ -3,6 +3,9 @@
 
 use std::env;
 use std::path::{Path, PathBuf};
+use std::process::{Command, Stdio};
+use std::thread;
+use std::time::{Duration, Instant};
 
 use super::helpers::which_exists;
 use super::{Check, Status};
@@ -115,18 +118,33 @@ pub(super) fn check(checks: &mut Vec<Check>) {
 }
 
 fn query_chrome_version(path: &Path) -> Option<String> {
-    let output = std::process::Command::new(path)
+    let mut child = Command::new(path)
         .arg("--version")
-        .output()
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
         .ok()?;
-    if !output.status.success() {
-        return None;
-    }
-    let s = String::from_utf8_lossy(&output.stdout).trim().to_string();
-    if s.is_empty() {
-        None
-    } else {
-        Some(s)
+
+    let deadline = Instant::now() + Duration::from_secs(2);
+    loop {
+        match child.try_wait() {
+            Ok(Some(status)) => {
+                let output = child.wait_with_output().ok()?;
+                if !status.success() {
+                    return None;
+                }
+                let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                return (!version.is_empty()).then_some(version);
+            }
+            Ok(None) if Instant::now() < deadline => {
+                thread::sleep(Duration::from_millis(25));
+            }
+            Ok(None) | Err(_) => {
+                let _ = child.kill();
+                let _ = child.wait();
+                return None;
+            }
+        }
     }
 }
 

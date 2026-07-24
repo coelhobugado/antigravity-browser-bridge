@@ -1,8 +1,28 @@
 # Antigravity Browser Bridge
 
-## 0.1.0-beta.2
+## 0.1.0-beta.3
 
 <!-- release:start -->
+### Correções
+
+- Corrigido o protocolo da extensão e do native host para usar a mesma versão, restaurando o handshake após a conexão.
+- Corrigida a instalação para configurar automaticamente `~/.gemini/config/mcp_config.json`, preservar servidores existentes e recusar JSON inválido.
+- Removidos módulos experimentais desconectados que simulavam IPC, políticas e adapters sem executar o fluxo real.
+- Corrigidos o popup e o content script com nonce criptográfico, renderização segura, autorização persistida por sessão e melhor resolução de elementos.
+- Impedido o travamento do `doctor` no Windows ao consultar a versão do Chrome e corrigido o teste de gravação para respeitar a dependência opcional do FFmpeg.
+
+### Melhorias
+
+- Atualizada a extensão para `1.2.0`, com popup para autorizar e revogar abas, status da conexão e atividade recente.
+- Atualizados os guias em português e inglês, a documentação do CLI e o skill principal.
+
+### Contributors
+
+- @coelhobugado
+<!-- release:end -->
+
+## 0.1.0-beta.2
+
 ### WorkService e estabilidade
 
 - Implementado o `WorkService` tipado para o perfil MCP `antigravity-work`, com máquina de estados, deadlines, idempotência, cancelamento, journal, checkpoints, retomada, exportação redigida e status real.
@@ -13,7 +33,6 @@
 ### Contributors
 
 - @coelhobugado
-<!-- release:end -->
 
 ## 0.1.0-beta.1
 

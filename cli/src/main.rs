@@ -1130,6 +1130,13 @@ fn main() {
                         }
                     }
                 }
+                match antigravity::installer::configure_mcp() {
+                    Ok(path) => println!("Configured Antigravity MCP: {}", path.display()),
+                    Err(error) => {
+                        eprintln!("{} {}", color::error_indicator(), error);
+                        exit(1);
+                    }
+                }
                 return;
             }
             Some("doctor") => {

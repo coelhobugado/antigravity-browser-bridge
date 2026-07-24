@@ -1,0 +1,46 @@
+{
+  "extName": {
+    "message": "Antigravity Agent Connector",
+    "description": "Nome da extensão"
+  },
+  "extDescription": {
+    "message": "Permite ao Antigravity agent operar o navegador nativamente com as contas ativas do usuário.",
+    "description": "Descrição da extensão"
+  },
+  "statusConnected": {
+    "message": "CONECTADO",
+    "description": "Status de conexão ativa"
+  },
+  "statusDisconnected": {
+    "message": "DESCONECTADO",
+    "description": "Status de desconexão"
+  },
+  "authorizeTab": {
+    "message": "Autorizar Aba Atual",
+    "description": "Botão de autorização da aba"
+  },
+  "revokeTab": {
+    "message": "Revogar Acesso",
+    "description": "Botão de revogação de aba"
+  },
+  "revokeAllTabs": {
+    "message": "Revogar Todas as Abas",
+    "description": "Botão para revogar todas as abas"
+  },
+  "openDiagnostics": {
+    "message": "Abrir Diagnóstico",
+    "description": "Botão para abrir diagnóstico"
+  },
+  "authorizedTabs": {
+    "message": "Abas Autorizadas",
+    "description": "Título da lista de abas autorizadas"
+  },
+  "recentActivity": {
+    "message": "Atividade Recente",
+    "description": "Título do histórico de atividades"
+  },
+  "noActivity": {
+    "message": "Nenhuma atividade registrada recentemente.",
+    "description": "Mensagem quando não há atividade"
+  }
+}

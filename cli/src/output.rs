@@ -3383,7 +3383,7 @@ agent-browser antigravity - Manage the Antigravity Chrome connector
 Usage: agent-browser antigravity <subcommand>
 
 Subcommands:
-  install                  Register this executable as the Chrome native host
+  install                  Register the native host and configure Antigravity MCP
   install --scope workspace
                            Install from the current workspace
   doctor                   Validate the generated native host manifest
@@ -3396,10 +3396,12 @@ Environment:
 
 The bundled extension has a stable ID derived from its manifest key. Normal
 installation never requires copying an extension ID or passing one to an agent.
+The install command preserves existing MCP servers and refuses to overwrite an
+invalid configuration file. Local installation is intentionally not an MCP tool.
 
-The extension does not receive access to every website automatically. Click its
-toolbar icon in each tab you want to authorize. Authorization survives same-origin
-navigation, is revoked on cross-origin navigation, and can be revoked by detaching.
+The extension does not receive access to every website automatically. Open its
+toolbar popup and authorize each required tab. Authorization survives same-origin
+navigation and is revoked on cross-origin navigation or through the popup.
 
 The antigravity-work MCP profile uses a typed WorkService with state transitions,
 deadlines, idempotency keys, cooperative cancellation, checkpoints, redacted

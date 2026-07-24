@@ -118,24 +118,24 @@ Baixe a extensão na [página de Releases](https://github.com/coelhobugado/antig
 3. Ative o modo do desenvolvedor.
 4. Clique em **Carregar sem compactação**.
 5. Selecione a pasta que contém `manifest.json`.
-6. Confirme que a extensão `1.1.2` foi carregada corretamente.
+6. Confirme que a extensão `1.2.0` foi carregada corretamente.
 
 O ID oficial é estável e já é autorizado pelo instalador.
 
 ## Configuração MCP no Antigravity
 
-Edite o arquivo:
+O comando `antigravity install` registra o native host e configura automaticamente o servidor MCP no arquivo:
 
 ```text
 C:\Users\SEU_USUARIO\.gemini\config\mcp_config.json
 ```
 
-Adicione a entrada sem apagar servidores já existentes:
+O instalador preserva os servidores existentes e se recusa a sobrescrever um arquivo JSON inválido. A configuração resultante contém:
 
 ```json
 {
   "mcpServers": {
-    "antigravity-browser-bridge": {
+    "agent-browser": {
       "command": "C:\\CAMINHO\\antigravity-browser-bridge\\bin\\agent-browser-win32-x64.exe",
       "args": ["mcp", "--tools", "antigravity-work"]
     }
@@ -143,12 +143,12 @@ Adicione a entrada sem apagar servidores já existentes:
 }
 ```
 
-Depois, recarregue o Antigravity e verifique se as ferramentas `agent_browser_work_*` aparecem.
+Não é necessário informar o ID da extensão. Depois da instalação, recarregue o Antigravity e verifique se as ferramentas `agent_browser_work_*` aparecem.
 
 ## Uso seguro
 
 1. Abra o site no Chrome.
-2. Autorize somente a aba necessária.
+2. Abra o popup da extensão e autorize somente a aba necessária.
 3. Peça ao agente para observar antes de agir.
 4. Exija confirmação antes de publicar, excluir, comprar ou enviar mensagens.
 5. Peça uma nova observação após a ação para verificar o resultado.
