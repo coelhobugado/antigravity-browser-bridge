@@ -1,0 +1,36 @@
+name: Feature request
+description: Propose an improvement aligned with user-controlled browser automation
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem should this solve?
+      description: Describe the real workflow or limitation, not only the desired implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Explain how the bridge should behave from the user's and agent's perspective.
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Security and confirmation considerations
+      description: Could this widen browser access, cross an origin, publish content, delete data or perform an irreversible action?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I may be able to help implement or test this feature.
