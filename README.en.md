@@ -1,58 +1,138 @@
 # Antigravity Browser Bridge
 
-> Beta software. Use it carefully with personal accounts and review important actions.
+> Open-source bridge between MCP-compatible agents and the user's already-authenticated Chrome browser, with explicit per-tab authorization, persistent work execution, and DOM-based verification.
 
-[Documentação em português](README.md)
+[Documentação em português](README.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Roadmap](docs/ANTIGRAVITY_APEX_PLAN.md) · [Changelog](CHANGELOG.md) · [Upstream relationship](UPSTREAM.md)
 
-Antigravity Browser Bridge connects MCP-compatible agents to the Chrome browser you already use. Its extension works with user-authorized tabs and preserves existing authenticated sessions on X, LinkedIn, and other web applications.
-
-The project is built on [Vercel's agent-browser](https://github.com/vercel-labs/agent-browser), licensed under Apache 2.0. The Rust engine, browser automation, and parts of the CLI come from that foundation. This version adds the `antigravity-work` MCP integration, a generic Chrome extension, Windows native messaging, and explicit per-tab authorization.
+> **Status:** `0.1.0-beta.3`. Use it carefully with personal accounts and review important actions.
 
 ![Antigravity Browser Bridge icon](extension/icons/icon-128.png)
 
-## Why it exists
+## Version overview
 
-Keyboard, PowerShell, VBS, and screen-coordinate automation depend on focus, loading time, and Windows permissions. They can type into the wrong window or incorrectly report success.
+| Component | Current version |
+|---|---:|
+| Antigravity Browser Bridge | `0.1.0-beta.3` |
+| Chrome extension | `1.2.0` |
+| agent-browser foundation | upstream `0.33.x` line |
 
-Antigravity Browser Bridge uses a different architecture:
+These versions are independent: the extension, the Bridge, and the upstream foundation do not necessarily share the same version number.
 
-1. Antigravity starts the `agent-browser` MCP server.
-2. The server communicates with the native host installed on Windows.
-3. The native host maintains an authenticated bridge to the extension.
-4. The extension observes the authorized tab's DOM and generates stable references.
-5. The agent reads, fills, focuses, and clicks elements through those references.
+## The problem this project solves
 
-This is more deterministic, but it does not make every model a perfect agent. The model must still observe the page, verify results, and handle interface changes.
+Keyboard, PowerShell, VBS, and screen-coordinate automation depend on focus, loading time, and visual state. They can click the wrong window, miss interface changes, or report success without evidence.
+
+Antigravity Browser Bridge provides a more deterministic layer for agents:
+
+1. the MCP client starts the server;
+2. the server communicates with a local native host;
+3. the native host maintains an authenticated bridge to the extension;
+4. the user explicitly authorizes each tab;
+5. the extension observes the DOM and generates structured references;
+6. the `WorkService` controls state, approval, execution, verification, and recovery;
+7. the agent records the result and can resume interrupted work without repeating confirmed effects.
+
+```text
+MCP agent
+   ↓
+MCP server / Rust CLI
+   ↓
+Typed WorkService
+   ↓
+Native Messaging Host
+   ↓
+Chrome extension
+   ↓
+Authorized tab and DOM
+```
+
+## What makes this project different
+
+The project is derived from [Vercel's agent-browser](https://github.com/vercel-labs/agent-browser), under Apache 2.0, but adds a separate layer for user-controlled operation of the user's everyday browser:
+
+- the `antigravity-work` MCP profile;
+- reuse of the already-open Chrome browser and existing authenticated sessions;
+- a dedicated Chrome extension;
+- Windows native messaging;
+- explicit per-tab authorization;
+- same-origin-only authorization persistence;
+- automatic revocation after cross-origin navigation;
+- a typed `WorkService` with a state machine;
+- deadlines, idempotency, and cooperative cancellation;
+- an append-only journal, checkpoints, and resume;
+- explicit approval before sensitive actions;
+- DOM-based post-action verification;
+- redacted export to reduce sensitive-data exposure;
+- automatic native-host and MCP installation and diagnostics;
+- an independent roadmap for recovery, evidence of success, and risk control.
+
+These additions turn the upstream foundation into a bridge for agents that need to operate real authenticated sessions without silently receiving access to the entire browser.
+
+See [UPSTREAM.md](UPSTREAM.md) for a clear breakdown of inherited components, Bridge-specific work, and preserved upstream history.
+
+## Work runtime
+
+The `antigravity-work` profile uses a `WorkService` separated from the MCP adapter. Every work item has its own identity, state, attempts, deadline, idempotency key, and persistent journal.
+
+Main flow:
+
+```text
+created → planning → waiting_for_tab → observing
+observing → waiting_for_approval → executing → verifying → completed
+executing/verifying → recovering → observing or executing
+any non-terminal state → failed or cancelled
+```
+
+Available operations include:
+
+- starting a session;
+- observing an authorized tab;
+- requesting approval;
+- executing a step;
+- verifying the result;
+- reading status and journal entries;
+- cancelling;
+- creating a checkpoint;
+- resuming;
+- exporting redacted state.
+
+Invalid transitions are rejected before the journal is changed. Confirmed effects are protected against repetition through idempotency. The complete contract is documented in [docs/WORK_CONTRACT.md](docs/WORK_CONTRACT.md).
+
+## Use cases
+
+- prepare a LinkedIn post and request confirmation before publishing;
+- fill forms in already-authenticated tabs;
+- inspect web systems without sharing cookies with the model;
+- automate repetitive work with DOM verification afterward;
+- resume interrupted workflows from checkpoints;
+- connect Antigravity or another MCP client to browser workflows;
+- test agents against real web applications with explicit authorization limits.
 
 ## Current status
-
-This release is `0.1.0-beta.2`.
 
 Currently available:
 
 - MCP integration through the `antigravity-work` profile;
-- access to an already-open Chrome browser and its authenticated sessions;
-- explicit per-tab authorization;
+- access to the already-open Chrome browser;
 - authorized-tab listing;
 - DOM observation with references;
 - click, focus, fill, type, and text-reading operations;
 - same-origin authorization persistence;
 - automatic revocation after cross-origin navigation;
-- a stable extension ID with no manual ID copying;
-- Windows native-host installation and diagnostics.
+- a stable extension ID;
+- a popup for authorizing and revoking tabs;
+- connection status and recent activity;
+- Windows native-host installation and diagnostics;
+- automatic MCP configuration in Antigravity;
+- WorkService journal, checkpoints, resume, idempotency, and verification.
 
 Beta limitations:
 
-- complex menus, dynamic dialogs, and some editors need richer operations;
+- complex menus, dynamic dialogs, and some editors still need richer operations;
 - website interfaces can change without notice;
-- destructive or public actions should require confirmation;
 - native-host installation currently focuses on Windows;
-- the connector still depends on site-specific DOM changes;
-- publishing, replying, and deleting still require explicit confirmation.
-
-A `not_implemented` response must never be treated as success.
-
-The `agent_browser_work_*` tools now use the typed `WorkService`: every work item has state, deadlines, idempotency, cooperative cancellation, an append-only journal, checkpoints, resume, and redacted export. See the [Stage 1 contract](docs/WORK_CONTRACT.md).
+- not every planned tool is implemented;
+- a `not_implemented` response must never be treated as success.
 
 ## Requirements
 
@@ -74,7 +154,7 @@ pnpm build:native
 
 The Windows executable is generated at `bin/agent-browser-win32-x64.exe`.
 
-Register the native host:
+Register and validate the native host:
 
 ```powershell
 .\bin\agent-browser-win32-x64.exe antigravity install
@@ -90,10 +170,10 @@ Download the extension from the [Releases page](https://github.com/coelhobugado/
 2. Open `chrome://extensions`.
 3. Enable Developer mode.
 4. Select **Load unpacked**.
-5. Select the extracted directory containing `manifest.json`.
+5. Select the directory containing `manifest.json`.
 6. Confirm that extension version `1.2.0` is displayed.
 
-The official extension ID is stable. Users and agents do not need to copy it because the installer already authorizes it.
+The official extension ID is stable and is already authorized by the installer.
 
 ## Configure MCP in Antigravity
 
@@ -118,13 +198,13 @@ The installer preserves existing servers and refuses to overwrite malformed JSON
 
 No extension ID needs to be copied. Restart Antigravity after installation and verify that the `agent_browser_work_*` tools appear.
 
-## Usage
+## Safe usage
 
 1. Open the target website in Chrome.
-2. Click the extension icon and select **Authorize Tab** in the popup.
-3. Confirm that the badge shows `ON`.
-4. Ask the agent to observe before acting.
-5. Require a second observation to verify posts, deletions, and messages.
+2. Open the extension popup and authorize only the required tab.
+3. Ask the agent to observe before acting.
+4. Require confirmation before publishing, deleting, buying, or messaging.
+5. Ask for another observation after the action to verify the result.
 
 Example prompt:
 
@@ -132,30 +212,9 @@ Example prompt:
 Use the agent_browser_work tools. List the authorized tabs, observe the LinkedIn tab, prepare the post, and ask for my confirmation before clicking Publish. Observe the page again afterward and verify the result.
 ```
 
-## Security
+The extension does not silently receive access to the entire browser. Never expose cookies, tokens, browser profiles, or local bridge state.
 
-The extension does not silently receive access to the entire browser. The user must authorize each tab in the popup. Authorization is removed when the tab changes origin, closes, is explicitly revoked, or the browser session ends.
-
-Recommended practices:
-
-- authorize only required tabs;
-- require confirmation before publishing, deleting, buying, or messaging;
-- never expose tokens, cookies, or bridge state;
-- run only trusted builds and releases;
-- inspect structured results when success is uncertain.
-
-## Troubleshooting
-
-```powershell
-.\bin\agent-browser-win32-x64.exe antigravity doctor
-.\bin\agent-browser-win32-x64.exe antigravity permissions
-```
-
-For `Access to the specified native messaging host is forbidden`, reinstall the native host, reload the extension, and fully restart Chrome.
-
-For `Receiving end does not exist`, reload the target tab and authorize it again. Internal pages such as `chrome://extensions` do not support content-script injection.
-
-## Development
+## Development and tests
 
 ```powershell
 pnpm install
@@ -166,12 +225,43 @@ node --check extension\background.js
 node --check extension\content.js
 ```
 
-The technical roadmap is available at [docs/ANTIGRAVITY_APEX_PLAN.md](docs/ANTIGRAVITY_APEX_PLAN.md). See [known beta issues](docs/BETA_KNOWN_ISSUES.md) and [build artifacts](docs/BUILD_ARTIFACTS.md) for coverage, local caches, and safe cleanup.
+Chrome end-to-end tests:
 
-The Stage 1 work contract is documented in [docs/WORK_CONTRACT.md](docs/WORK_CONTRACT.md).
+```powershell
+cargo test e2e --manifest-path cli\Cargo.toml -- --ignored --test-threads=1
+```
+
+CI also validates version synchronization, Clippy, the extension, encoding, baselines, packaging, SBOM generation, and global package installation.
+
+## Contributing
+
+Contributions are welcome, especially for:
+
+- testing against real applications;
+- support for menus, dialogs, and editors;
+- compatibility with other MCP clients;
+- installers for other operating systems;
+- security and recovery behavior;
+- Portuguese and English documentation.
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. Report vulnerabilities according to [SECURITY.md](SECURITY.md).
+
+## Roadmap
+
+Current priorities include:
+
+- risk-level confirmation policies;
+- richer operations for dynamic interfaces;
+- recovery after DOM changes;
+- automatic evidence of success or failure;
+- signed installers and packages;
+- coverage for X, LinkedIn, and generic applications;
+- broader MCP-client and operating-system support.
+
+The detailed plan is available in [docs/ANTIGRAVITY_APEX_PLAN.md](docs/ANTIGRAVITY_APEX_PLAN.md).
 
 ## Credits and license
 
-Based on [vercel-labs/agent-browser](https://github.com/vercel-labs/agent-browser). This project preserves the Apache 2.0 license and applicable notices. See [LICENSE](LICENSE).
+Based on [vercel-labs/agent-browser](https://github.com/vercel-labs/agent-browser). This project preserves the Apache 2.0 license and applicable notices. See [LICENSE](LICENSE) and [UPSTREAM.md](UPSTREAM.md).
 
-Antigravity Browser Bridge is not an official Vercel, Google, X, or LinkedIn product.
+Antigravity Browser Bridge is not an official Vercel, Google, X, LinkedIn, or Anthropic product.
