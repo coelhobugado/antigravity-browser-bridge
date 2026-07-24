@@ -23,6 +23,51 @@ jobs:
       - name: Check version sync
         run: node scripts/check-version-sync.js
 
+  extension-validation:
+    name: Extension Validation and Budgets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+
+      - name: Validate extension
+        run: node scripts/validate-extension.mjs
+
+      - name: Check product encoding
+        run: node scripts/check-encoding.mjs
+
+      - name: Validate evaluation baseline
+        run: node scripts/validate-evals.mjs
+
+      - name: Check source size budgets
+        run: node scripts/measure-baseline.mjs --check --output artifacts/antigravity-baseline.json
+
+      - name: Package extension
+        run: python scripts/package-extension.py --output artifacts/antigravity-browser-bridge-extension.zip
+
+      - name: Generate SBOM
+        run: node scripts/generate-sbom.mjs --output artifacts/sbom.cdx.json
+
+      - name: Upload validation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-validation
+          path: artifacts/
+
+      - name: Prepare release bundle
+        run: node scripts/prepare-release.mjs
+
+      - name: Upload release bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: antigravity-browser-bridge-beta-artifacts
+          path: artifacts/release/
+
   rust:
     name: Rust
     runs-on: ubuntu-latest
@@ -48,6 +93,34 @@ jobs:
 
       - name: Run Rust tests
         run: cargo test --profile ci --manifest-path cli/Cargo.toml
+
+  baseline:
+    name: Runtime and Disk Baseline
+    runs-on: ubuntu-latest
+    needs: rust
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build release binary
+        run: cargo build --release --manifest-path cli/Cargo.toml
+
+      - name: Measure runtime, binary and disk baseline
+        run: node scripts/measure-baseline.mjs --measure-runtime --include-caches --output artifacts/antigravity-runtime-baseline.json
+
+      - name: Upload baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: antigravity-runtime-baseline
+          path: artifacts/antigravity-runtime-baseline.json
 
   dashboard:
     name: Dashboard
@@ -124,6 +197,7 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos-latest
@@ -176,6 +250,30 @@ jobs:
 
       - name: Run e2e tests
         run: cargo test --profile ci --manifest-path cli/Cargo.toml e2e -- --ignored --test-threads=1
+
+  native-parity:
+    name: Native Browser Parity
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    needs: rust
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: cli
+
+      - name: Install Chrome
+        run: cargo run --manifest-path cli/Cargo.toml -- install --with-deps
+
+      - name: Run documented action parity
+        run: cargo test --profile ci --manifest-path cli/Cargo.toml native::parity_tests -- --ignored --test-threads=1
+        timeout-minutes: 10
 
   windows-integration:
     name: Windows Integration Test
@@ -240,6 +338,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: rust-cross
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest

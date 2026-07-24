@@ -12,6 +12,7 @@ bin/.install-method
 
 # Rust build artifacts
 cli/target/
+cli/target-stage1-test/
 cli/*.o
 native-shim/target/
 
@@ -35,6 +36,7 @@ __pycache__/
 
 # Test artifacts
 *.png
+artifacts/
 *.jpeg
 *.jpg
 *.webm

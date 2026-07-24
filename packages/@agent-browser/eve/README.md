@@ -135,7 +135,7 @@ Each tool shells out to the `agent-browser` CLI inside the sandbox from `ctx.get
 
 ## Example
 
-See [`examples/eve`](https://github.com/vercel-labs/agent-browser/tree/main/examples/eve) for a complete Next.js eve app with this extension mounted.
+See [`examples/eve`](https://github.com/coelhobugado/antigravity-browser-bridge/tree/main/examples/eve) for a complete Next.js eve app with this extension mounted.
 
 ## License
 

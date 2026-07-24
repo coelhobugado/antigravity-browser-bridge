@@ -3331,6 +3331,18 @@ Common tools include:
   agent_browser_get_url    Read the current URL
   agent_browser_close      Close the browser session
 
+Antigravity work tools:
+  agent_browser_work_session_start  Create a typed work identity and list authorized tabs
+  agent_browser_work_observe        Persist an observation in the work journal
+  agent_browser_work_execute        Execute an idempotent step with deadlines
+  agent_browser_work_verify         Verify the latest effect and postconditions
+  agent_browser_work_status         Read state, progress, blocking reason, and next decision
+  agent_browser_work_cancel         Cooperatively cancel active work
+  agent_browser_work_checkpoint     Save a resumable checkpoint
+  agent_browser_work_resume         Resume without repeating confirmed effects
+  agent_browser_work_export         Export redacted work evidence
+  agent_browser_work_journal        Inspect or explicitly delete journal data
+
 Each tool has typed fields such as url, selector, text, key, and session.
 Each tool also accepts extraArgs for advanced CLI flags and exact CLI parity.
 Tool discovery is paginated and includes read-only/open-world annotations so
@@ -3388,6 +3400,10 @@ installation never requires copying an extension ID or passing one to an agent.
 The extension does not receive access to every website automatically. Click its
 toolbar icon in each tab you want to authorize. Authorization survives same-origin
 navigation, is revoked on cross-origin navigation, and can be revoked by detaching.
+
+The antigravity-work MCP profile uses a typed WorkService with state transitions,
+deadlines, idempotency keys, cooperative cancellation, checkpoints, redacted
+exports, and an append-only journal. Work status is independent from session start.
 "##
         }
 

@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-24T14:03:30.275Z",
+  "packageVersion": "0.1.0-beta.2",
+  "tracked": {
+    "files": 480,
+    "bytes": 8223569
+  },
+  "extension": {
+    "bytes": 1918256,
+    "files": 10
+  },
+  "extensionZip": {
+    "bytes": 25649,
+    "files": 1
+  },
+  "binaries": {
+    "bin/agent-browser-win32-x64.exe": {
+      "bytes": 0,
+      "files": 0,
+      "present": false
+    },
+    "cli/target/release/agent-browser.exe": {
+      "bytes": 0,
+      "files": 0,
+      "present": false
+    },
+    "cli/target/debug/agent-browser.exe": {
+      "bytes": 37057536,
+      "files": 1
+    }
+  },
+  "runtime": {
+    "ok": false,
+    "executable": null,
+    "elapsedMs": null,
+    "peakRssBytes": null,
+    "reason": "runtime measurement not requested"
+  },
+  "caches": {
+    "cli/target": {
+      "present": true,
+      "bytes": null,
+      "files": null
+    },
+    "node_modules": {
+      "present": true,
+      "bytes": null,
+      "files": null
+    },
+    "packages/dashboard/node_modules": {
+      "present": true,
+      "bytes": null,
+      "files": null
+    },
+    ".pnpm-store": {
+      "present": false,
+      "bytes": null,
+      "files": null
+    },
+    "artifacts": {
+      "present": true,
+      "bytes": null,
+      "files": null
+    }
+  },
+  "budgets": {
+    "trackedBytes": 157286400,
+    "extensionBytes": 5242880,
+    "cacheBytes": null
+  },
+  "note": "Cache directories are diagnostic only and are never included in a release artifact."
+}

@@ -1,0 +1,26 @@
+import { Callout } from 'nextra/components'
+
+# Antigravity work contract
+
+The Antigravity work profile is backed by a versioned `WorkService`. Every work item has typed identity, explicit state, finite deadlines, idempotency, cooperative cancellation, checkpoints, resume, and redacted export.
+
+## State machine
+
+```text
+created → planning → waiting_for_tab → observing
+observing → waiting_for_approval → executing → verifying → completed
+executing/verifying → recovering → observing or executing
+any non-terminal state → failed or cancelled
+```
+
+Terminal states cannot transition to another state. Invalid transitions fail before the next external effect.
+
+## MCP operations
+
+Use `agent_browser_work_session_start` to create a work identity and receive `workId`. Pass that ID to `work_observe`, `work_execute`, `work_verify`, `work_status`, `work_cancel`, `work_checkpoint`, `work_resume`, `work_export`, `work_request_approval`, and `work_journal`.
+
+Use `idempotencyKey` for retries. A confirmed effect is returned instead of being submitted again. Journal events are redacted when inspected, and deletion requires explicit `confirm: true`.
+
+<Callout type="warning">
+Only authorize the tabs and accounts intended for the task. Require approval before publishing, replying, or deleting content.
+</Callout>
