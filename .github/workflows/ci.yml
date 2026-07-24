@@ -383,8 +383,8 @@ jobs:
 
       - name: Test npm global install
         run: |
-          npm pack
-          npm install -g agent-browser-*.tgz
+          package_file="$(npm pack --silent)"
+          npm install -g "./${package_file}"
           agent-browser --version
         shell: bash
 
