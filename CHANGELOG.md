@@ -1,8 +1,22 @@
 # Antigravity Browser Bridge
 
-## 0.1.0-beta.1
+## 0.1.0-beta.2
 
 <!-- release:start -->
+### WorkService e estabilidade
+
+- Implementado o `WorkService` tipado para o perfil MCP `antigravity-work`, com máquina de estados, deadlines, idempotência, cancelamento, journal, checkpoints, retomada, exportação redigida e status real.
+- Separado o adapter MCP da lógica de negócio e adicionado runtime assíncrono sob demanda com lock por instância.
+- Atualizados contratos, documentação, validações da extensão, avaliações e artefatos de release.
+- Atualizada a extensão para `1.1.2`.
+
+### Contributors
+
+- @coelhobugado
+<!-- release:end -->
+
+## 0.1.0-beta.1
+
 ### Beta Release
 
 - Added the **Antigravity Work MCP profile** for operating explicitly authorized tabs in the user's existing Chrome session
@@ -18,7 +32,6 @@
 ### Contributors
 
 - @coelhobugado
-<!-- release:end -->
 
 ## 0.33.0
 

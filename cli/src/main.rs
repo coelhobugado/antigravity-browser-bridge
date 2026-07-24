@@ -1,3 +1,4 @@
+pub mod antigravity;
 mod chat;
 mod color;
 mod commands;
@@ -15,7 +16,6 @@ mod skills;
 mod test_utils;
 mod upgrade;
 mod validation;
-pub mod antigravity;
 pub mod work;
 
 use serde_json::json;
@@ -1105,7 +1105,10 @@ fn main() {
     if clean.first().map(|s| s.as_str()) == Some("antigravity") {
         match clean.get(1).map(|s| s.as_str()) {
             Some("install") => {
-                let scope = if clean.iter().any(|a| a == "--scope" && clean.contains(&"workspace".to_string())) {
+                let scope = if clean
+                    .iter()
+                    .any(|a| a == "--scope" && clean.contains(&"workspace".to_string()))
+                {
                     "workspace"
                 } else {
                     "global"

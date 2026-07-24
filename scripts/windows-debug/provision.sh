@@ -162,7 +162,7 @@ Log "Build tools installed."
 
 # Clone repo
 Log "Cloning agent-browser..."
-git clone https://github.com/vercel-labs/agent-browser.git C:\agent-browser
+git clone https://github.com/coelhobugado/antigravity-browser-bridge.git C:\agent-browser
 Set-Location C:\agent-browser
 Log "Repo cloned."
 

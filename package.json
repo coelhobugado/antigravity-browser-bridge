@@ -1,6 +1,6 @@
 {
   "name": "antigravity-browser-bridge",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0-beta.2",
   "description": "Native Chrome and MCP bridge for Antigravity agents",
   "private": true,
   "type": "module",
@@ -31,7 +31,19 @@
     "build:docker": "docker build --platform linux/amd64 -t agent-browser-builder -f docker/Dockerfile.build .",
     "release": "pnpm run version:sync && pnpm run build:all-platforms",
     "postinstall": "node scripts/postinstall.js",
-    "build:dashboard": "cd packages/dashboard && pnpm build"
+    "build:dashboard": "cd packages/dashboard && pnpm build",
+    "validate:extension": "node scripts/validate-extension.mjs",
+    "check:encoding": "node scripts/check-encoding.mjs",
+    "validate:evals": "node scripts/validate-evals.mjs",
+    "package:extension": "python scripts/package-extension.py --output artifacts/antigravity-browser-bridge-extension.zip",
+    "baseline": "node scripts/measure-baseline.mjs",
+    "baseline:runtime": "node scripts/measure-baseline.mjs --measure-runtime",
+    "baseline:full": "node scripts/measure-baseline.mjs --include-caches",
+    "baseline:check": "node scripts/measure-baseline.mjs --check",
+    "sbom": "node scripts/generate-sbom.mjs",
+    "release:artifacts": "node scripts/prepare-release.mjs",
+    "cleanup:cache": "powershell -ExecutionPolicy Bypass -File scripts/cleanup-cache.ps1",
+    "cleanup:cache:apply": "powershell -ExecutionPolicy Bypass -File scripts/cleanup-cache.ps1 -Apply"
   },
   "keywords": [
     "browser",

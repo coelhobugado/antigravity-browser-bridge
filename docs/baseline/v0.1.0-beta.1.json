@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "release": "0.1.0-beta.1",
+  "scope": "source and extension baseline",
+  "measuredOn": "2026-07-24",
+  "budgets": {
+    "trackedBytes": 157286400,
+    "extensionBytes": 5242880,
+    "extensionZipBytes": 5242880,
+    "startupP95Ms": 3000,
+    "observeP95Ms": 1500
+  },
+  "runtimeMeasurement": {
+    "command": "agent-browser --help",
+    "latency": "measured by the Linux baseline CI job",
+    "peakRss": "measured with /usr/bin/time when available"
+  },
+  "observations": {
+    "trackedBytes": 8222869,
+    "extensionBytes": 1918256,
+    "extensionZipBytes": 25649,
+    "debugBinaryBytes": 37057536,
+    "localWindowsStartupMs": 57.08,
+    "localPeakRssBytes": null,
+    "linuxReleaseAndCacheBytes": "captured by CI artifact baseline.json"
+  },
+  "cachePolicy": {
+    "includedInRelease": false,
+    "directories": ["cli/target", "node_modules", "packages/dashboard/node_modules", ".pnpm-store", "artifacts"]
+  },
+  "notes": "Replace measured values with a generated report from pnpm baseline when publishing a new release."
+}

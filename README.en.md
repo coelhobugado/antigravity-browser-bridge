@@ -26,7 +26,7 @@ This is more deterministic, but it does not make every model a perfect agent. Th
 
 ## Current status
 
-This release is `0.1.0-beta.1`.
+This release is `0.1.0-beta.2`.
 
 Currently available:
 
@@ -47,9 +47,12 @@ Beta limitations:
 - website interfaces can change without notice;
 - destructive or public actions should require confirmation;
 - native-host installation currently focuses on Windows;
-- not every planned `antigravity-work` tool is implemented.
+- the connector still depends on site-specific DOM changes;
+- publishing, replying, and deleting still require explicit confirmation.
 
 A `not_implemented` response must never be treated as success.
+
+The `agent_browser_work_*` tools now use the typed `WorkService`: every work item has state, deadlines, idempotency, cooperative cancellation, an append-only journal, checkpoints, resume, and redacted export. See the [Stage 1 contract](docs/WORK_CONTRACT.md).
 
 ## Requirements
 
@@ -81,14 +84,14 @@ Register the native host:
 
 ## Install the extension
 
-Download `antigravity-browser-bridge-extension-v0.1.0-beta.1.zip` from Releases or use the repository's `extension` directory.
+Download the extension from the [Releases page](https://github.com/coelhobugado/antigravity-browser-bridge/releases) or use the repository's `extension` directory.
 
 1. Extract the ZIP into a permanent directory.
 2. Open `chrome://extensions`.
 3. Enable Developer mode.
 4. Select **Load unpacked**.
 5. Select the extracted directory containing `manifest.json`.
-6. Confirm that extension version `1.1.1` is displayed.
+6. Confirm that extension version `1.1.2` is displayed.
 
 The official extension ID is stable. Users and agents do not need to copy it because the installer already authorizes it.
 
@@ -165,7 +168,9 @@ node --check extension\background.js
 node --check extension\content.js
 ```
 
-The technical roadmap is available at [docs/ANTIGRAVITY_APEX_PLAN.md](docs/ANTIGRAVITY_APEX_PLAN.md).
+The technical roadmap is available at [docs/ANTIGRAVITY_APEX_PLAN.md](docs/ANTIGRAVITY_APEX_PLAN.md). See [known beta issues](docs/BETA_KNOWN_ISSUES.md) and [build artifacts](docs/BUILD_ARTIFACTS.md) for coverage, local caches, and safe cleanup.
+
+The Stage 1 work contract is documented in [docs/WORK_CONTRACT.md](docs/WORK_CONTRACT.md).
 
 ## Credits and license
 

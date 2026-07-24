@@ -4,7 +4,7 @@
 
 [English documentation](README.en.md) · [Contribuir](CONTRIBUTING.md) · [Segurança](SECURITY.md) · [Roadmap](docs/ANTIGRAVITY_APEX_PLAN.md) · [Changelog](CHANGELOG.md)
 
-> **Status:** `0.1.0-beta.1`. Use com atenção em contas pessoais e sempre revise ações importantes.
+> **Status:** `0.1.0-beta.2`. Use com atenção em contas pessoais e sempre revise ações importantes.
 
 ![Ícone do Antigravity Browser Bridge](extension/icons/icon-128.png)
 
@@ -111,14 +111,14 @@ Registre e valide o native host:
 
 ## Instalação da extensão
 
-Baixe `antigravity-browser-bridge-extension-v0.1.0-beta.1.zip` na página de Releases ou use a pasta `extension`.
+Baixe a extensão na [página de Releases](https://github.com/coelhobugado/antigravity-browser-bridge/releases) ou use a pasta `extension`.
 
 1. Extraia o ZIP para uma pasta permanente.
 2. Abra `chrome://extensions`.
 3. Ative o modo do desenvolvedor.
 4. Clique em **Carregar sem compactação**.
 5. Selecione a pasta que contém `manifest.json`.
-6. Confirme que a extensão foi carregada corretamente.
+6. Confirme que a extensão `1.1.2` foi carregada corretamente.
 
 O ID oficial é estável e já é autorizado pelo instalador.
 

@@ -390,15 +390,18 @@ fn minimal_command(action: &str, id: &str) -> Value {
 // ---------------------------------------------------------------------------
 
 #[tokio::test]
+#[ignore = "requires a real Chrome instance; run the browser parity job explicitly"]
 async fn test_all_documented_actions_are_handled() {
     let mut state = DaemonState::new();
+    state.session_id = format!("parity-{}", std::process::id());
     state.default_timeout_ms = 100;
 
     for (i, action) in DOCUMENTED_ACTIONS.iter().enumerate() {
         let id = format!("parity-{}", i);
         let cmd = minimal_command(action, &id);
+        let timeout = if *action == "launch" { 60 } else { 10 };
         let result = tokio::time::timeout(
-            std::time::Duration::from_secs(10),
+            std::time::Duration::from_secs(timeout),
             execute_command(&cmd, &mut state),
         )
         .await
@@ -521,6 +524,7 @@ async fn test_auth_save_and_show() {
 }
 
 #[tokio::test]
+#[ignore = "requires a real Chrome instance; run the browser parity job explicitly"]
 async fn test_har_start_stop_without_browser() {
     let mut state = DaemonState::new();
     // har_start requires a browser. Because execute_command auto-launches when

@@ -35,7 +35,7 @@ The extension uses `activeTab` and runtime script injection. It does not inject 
 }
 ```
 
-The compact profile lists authorized tabs, observes a selected tab, and executes generic element actions. Operations that do not yet have durable implementations return `not_implemented` instead of placeholder success.
+The profile is backed by the typed WorkService. Start a work identity with `agent_browser_work_session_start`, then pass its `workId` to observe, execute, verify, status, cancel, checkpoint, resume, export, approval, and journal operations. Effects accept an `idempotencyKey`, all calls have finite deadlines, and transitions are persisted to a redacted local journal. Public or destructive actions should request approval before execution.
 
 ## Uninstall
 

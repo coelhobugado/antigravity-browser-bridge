@@ -180,6 +180,7 @@ const TOOL_WORK_EXPORT: &str = "agent_browser_work_export";
 const TOOL_WORK_REQUEST_APPROVAL: &str = "agent_browser_work_request_approval";
 const TOOL_WORK_STATUS: &str = "agent_browser_work_status";
 const TOOL_WORK_CANCEL: &str = "agent_browser_work_cancel";
+const TOOL_WORK_JOURNAL: &str = "agent_browser_work_journal";
 const DEFAULT_TIMEOUT_MS: u64 = 120_000;
 const MAX_IMAGE_BYTES: u64 = 10 * 1024 * 1024;
 const RAW_JSON_ARG: &str = "--raw-json";
@@ -511,6 +512,7 @@ const ANTIGRAVITY_WORK_PROFILE_TOOLS: &[&str] = &[
     TOOL_WORK_REQUEST_APPROVAL,
     TOOL_WORK_STATUS,
     TOOL_WORK_CANCEL,
+    TOOL_WORK_JOURNAL,
 ];
 
 /// Run the MCP stdio server until stdin closes or a `shutdown` request is
@@ -557,7 +559,10 @@ fn parse_mcp_config(args: &[String]) -> Result<McpConfig, String> {
             };
             tools_arg = Some(value.to_string());
             i += 2;
-        } else if let Some(value) = arg.strip_prefix("--tools=").or_else(|| arg.strip_prefix("--profile=")) {
+        } else if let Some(value) = arg
+            .strip_prefix("--tools=")
+            .or_else(|| arg.strip_prefix("--profile="))
+        {
             tools_arg = Some(value.to_string());
             i += 1;
         } else {
@@ -934,7 +939,11 @@ fn tools() -> Vec<Value> {
             "Start Work Session",
             "Connect to the Antigravity Chrome connector and list tabs explicitly authorized by the user.",
             json!({
-                "requestId": { "type": "string", "description": "Optional correlation ID." }
+                "requestId": { "type": "string", "description": "Optional correlation ID." },
+                "workId": { "type": "string", "description": "Optional stable work identity." },
+                "idempotencyKey": { "type": "string", "description": "Retry key for exactly-once start semantics." },
+                "objective": { "type": "string", "description": "Goal of the work session." },
+                "deadline": { "type": "object", "description": "Task, step, transport and verification deadlines in milliseconds." }
             }),
             &[],
         ),
@@ -944,9 +953,10 @@ fn tools() -> Vec<Value> {
             "Observe an explicitly authorized browser tab.",
             json!({
                 "requestId": { "type": "string", "description": "Optional correlation ID." },
+                "workId": { "type": "string", "description": "Work identity returned by start." },
                 "tabId": { "type": "integer", "minimum": 0, "description": "Authorized Chrome tab ID. Uses the active authorized tab when omitted." }
             }),
-            &[],
+            &["workId"],
         ),
         tool(
             TOOL_WORK_EXECUTE,
@@ -954,6 +964,8 @@ fn tools() -> Vec<Value> {
             "Execute one generic action in an explicitly authorized browser tab.",
             json!({
                 "requestId": { "type": "string", "description": "Optional correlation ID." },
+                "workId": { "type": "string", "description": "Work identity returned by start." },
+                "idempotencyKey": { "type": "string", "description": "Retry key that prevents duplicate effects." },
                 "tabId": { "type": "integer", "minimum": 0, "description": "Authorized Chrome tab ID." },
                 "action": { "type": "string", "enum": ["click", "fill", "type", "focus", "get_text"] },
                 "target": {
@@ -968,57 +980,68 @@ fn tools() -> Vec<Value> {
                 },
                 "text": { "type": "string", "description": "Text for fill or type actions." }
             }),
-            &["action", "target"],
+            &["workId", "action", "target"],
         ),
         tool(
             TOOL_WORK_VERIFY,
             "Verify Work",
-            "Verify a postcondition. Returns not_implemented until evidence-based verification is available.",
-            json!({}),
-            &[],
+            "Verify the latest work effect against its postconditions.",
+            json!({"workId": {"type": "string"}}),
+            &["workId"],
         ),
         tool(
             TOOL_WORK_CHECKPOINT,
             "Checkpoint Work",
-            "Save a durable checkpoint. Returns not_implemented until durable checkpointing is available.",
-            json!({}),
-            &[],
+            "Save a durable checkpoint containing work state and confirmed effects.",
+            json!({"workId": {"type": "string"}}),
+            &["workId"],
         ),
         tool(
             TOOL_WORK_RESUME,
             "Resume Work",
-            "Resume from a checkpoint. Returns not_implemented until durable resume is available.",
-            json!({}),
-            &[],
+            "Resume a durable checkpoint without repeating confirmed effects.",
+            json!({"checkpointId": {"type": "string"}}),
+            &["checkpointId"],
         ),
         tool(
             TOOL_WORK_EXPORT,
             "Export Work Artifacts",
-            "Export work artifacts. Returns not_implemented until artifact export is available.",
-            json!({}),
-            &[],
+            "Export a redacted work record and manifest.",
+            json!({"workId": {"type": "string"}}),
+            &["workId"],
         ),
         tool(
             TOOL_WORK_REQUEST_APPROVAL,
             "Request Approval",
-            "Request a bound approval receipt. Returns not_implemented until approval binding is available.",
-            json!({}),
-            &[],
+            "Request a bound approval receipt for a planned intent.",
+            json!({"workId": {"type": "string"}, "intent": {"type": "object"}}),
+            &["workId"],
         ),
         tool(
             TOOL_WORK_STATUS,
             "Work Status",
-            "Get connector status and list explicitly authorized tabs.",
+            "Get the real state, progress, blocking condition and next decision of work.",
             json!({
-                "requestId": { "type": "string", "description": "Optional correlation ID." }
+                "workId": { "type": "string" }
             }),
-            &[],
+            &["workId"],
         ),
         tool(
             TOOL_WORK_CANCEL,
             "Cancel Work",
-            "Cancel running work. Returns not_implemented until cancellation is available.",
-            json!({}),
+            "Cooperatively cancel waiting, retrying or future work steps.",
+            json!({"workId": {"type": "string"}}),
+            &["workId"],
+        ),
+        tool(
+            TOOL_WORK_JOURNAL,
+            "Work Journal",
+            "Inspect redacted journal events or delete them with explicit confirmation.",
+            json!({
+                "action": {"type": "string", "enum": ["inspect", "delete"], "default": "inspect"},
+                "workId": {"type": "string"},
+                "confirm": {"type": "boolean"}
+            }),
             &[],
         ),
     ];
@@ -2355,16 +2378,21 @@ fn call_tool(params: Option<&Value>, config: &McpConfig) -> Result<Value, Protoc
         TOOL_CHAT => call_chat(arguments),
         TOOL_EVAL => call_eval(arguments),
         TOOL_CLOSE => call_close(arguments),
-        TOOL_WORK_SESSION_START => Ok(crate::antigravity::mcp_compact::work_session_start(arguments)),
+        TOOL_WORK_SESSION_START => Ok(crate::antigravity::mcp_compact::work_session_start(
+            arguments,
+        )),
         TOOL_WORK_OBSERVE => Ok(crate::antigravity::mcp_compact::work_observe(arguments)),
         TOOL_WORK_EXECUTE => Ok(crate::antigravity::mcp_compact::work_execute(arguments)),
         TOOL_WORK_VERIFY => Ok(crate::antigravity::mcp_compact::work_verify(arguments)),
         TOOL_WORK_CHECKPOINT => Ok(crate::antigravity::mcp_compact::work_checkpoint(arguments)),
         TOOL_WORK_RESUME => Ok(crate::antigravity::mcp_compact::work_resume(arguments)),
         TOOL_WORK_EXPORT => Ok(crate::antigravity::mcp_compact::work_export(arguments)),
-        TOOL_WORK_REQUEST_APPROVAL => Ok(crate::antigravity::mcp_compact::work_request_approval(arguments)),
+        TOOL_WORK_REQUEST_APPROVAL => Ok(crate::antigravity::mcp_compact::work_request_approval(
+            arguments,
+        )),
         TOOL_WORK_STATUS => Ok(crate::antigravity::mcp_compact::work_status(arguments)),
         TOOL_WORK_CANCEL => Ok(crate::antigravity::mcp_compact::work_cancel(arguments)),
+        TOOL_WORK_JOURNAL => Ok(crate::antigravity::mcp_compact::work_journal(arguments)),
         _ => unreachable!("known MCP tool missing call handler: {}", name),
     }
 }
