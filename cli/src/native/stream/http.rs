@@ -483,6 +483,8 @@ mod tests {
     #[cfg(unix)]
     use crate::test_utils::EnvGuard;
     use std::sync::Arc;
+    #[cfg(unix)]
+    use tokio::io::AsyncBufReadExt;
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
     use tokio::net::TcpListener;
     #[cfg(unix)]
